@@ -16,12 +16,7 @@
       </div>
     </div>
     <div class="messages">
-      <van-list
-        v-model:loading="loading"
-        :finished="finished"
-        finished-text="没有更多了"
-        @load="onLoad"
-      >
+      <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
         <div v-for="item in messages" :key="item.objectId" class="message-item">
           <div class="message-item-box">
             <div class="user">
@@ -56,10 +51,7 @@
                       </div>
                       <div class="line">|</div>
                       <div class="comment" @click="toComment">
-                        <van-icon
-                          name="smile-comment-o"
-                          size="16px"
-                        />&nbsp;评论
+                        <van-icon name="smile-comment-o" size="16px" />&nbsp;评论
                       </div>
                     </div>
                     <template #reference>
@@ -71,9 +63,9 @@
                 </div>
               </div>
               <div class="stars" v-if="item.name === 'zhanzhan.wei'">
-                <span class="star-icon"
-                  ><van-icon name="like-o" size="12"
-                /></span>
+                <span class="star-icon">
+                  <van-icon name="like-o" size="12" />
+                </span>
                 <div class="star-item">
                   zhanzhan.wei
                 </div>
@@ -95,86 +87,93 @@
 import {
   MessageStateOPtion,
   BmobMessage,
-  BmobMessageOption
-} from "@/entities/bmob";
-import { getBeforeNowCount, getRandomAvatar } from "@/utils/utils";
-import { defineComponent, onMounted, reactive, toRefs } from "vue";
-import { useRouter } from "vue-router";
+  BmobMessageOption,
+} from '@/entities/bmob'
+import { getBeforeNowCount, getRandomAvatar } from '@/utils/utils'
+import { defineComponent, onMounted, reactive, toRefs } from 'vue'
+import { useRouter } from 'vue-router'
+import img_1 from '../../assets/images/1.jpg'
+import img_2 from '../../assets/images/2.jpg'
+import img_qrcode from '../../assets/images/qrcode.jpg'
+import img_3 from '../../assets/images/3.jpg'
+import img_4 from '../../assets/images/4.jpg'
+import img_5 from '../../assets/images/5.jpg'
+import img_6 from '../../assets/images/6.jpg'
 
 export default defineComponent({
-  name: "MESSAGE",
+  name: 'MESSAGE',
   setup(prop, context) {
-    console.log("prop", context);
-    const router = useRouter();
+    console.log('prop', context)
+    const router = useRouter()
     const stateObj: MessageStateOPtion = {
       messages: [],
-      input: "",
+      input: '',
       loading: false,
-      finished: false
-    };
-    const state = reactive(stateObj);
+      finished: false,
+    }
+    const state = reactive(stateObj)
 
     const form = new BmobMessage(
-      reactive({ name: "", content: "", files: [], state: false })
-    );
+      reactive({ name: '', content: '', files: [], state: false })
+    )
 
     const toBack = () => {
-      router.back();
-    };
+      router.back()
+    }
     const onLoad = async () => {
       try {
-        form.page++;
-        const messages = await form.findAll();
-        state.loading = false;
+        form.page++
+        const messages = await form.findAll()
+        state.loading = false
         if (messages.length < form.size) {
-          state.finished = true;
+          state.finished = true
         }
-        state.messages.push(...messages);
+        state.messages.push(...messages)
       } catch (error) {
-        state.finished = true;
+        state.finished = true
       }
-    };
+    }
     const getMessages = async () => {
-      const messages = await form.findAll();
+      const messages = await form.findAll()
       const init: BmobMessageOption = {
-        objectId: "1",
-        name: "zhanzhan.wei",
+        objectId: '1',
+        name: 'zhanzhan.wei',
         content:
-          "Hello everyone! 欢迎大家，请适当言论，喜欢记得给个star呀！(づ￣ 3￣)づ",
+          'Hello everyone! 欢迎大家，请适当言论，喜欢记得给个star呀！(づ￣ 3￣)づ',
         files: [
-          "https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3831337348,1544176931&fm=26&gp=0.jpg",
-          "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=103133962,3138181394&fm=26&gp=0.jpg",
-          require("../../assets/images/1.jpg"),
-          require("../../assets/images/2.png"),
-          require("../../assets/images/qrcode.jpg"),
-          require("../../assets/images/3.png"),
-          require("../../assets/images/4.png"),
-          require("../../assets/images/5.png"),
-          require("../../assets/images/6.png")
+          'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3831337348,1544176931&fm=26&gp=0.jpg',
+          'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=103133962,3138181394&fm=26&gp=0.jpg',
+          img_1,
+          img_2,
+          img_qrcode,
+          img_3,
+          img_4,
+          img_5,
+          img_6,
         ],
-        state: false
-      };
-      state.messages = [init, ...messages];
-    };
+        state: false,
+      }
+      state.messages = [init, ...messages]
+    }
 
     // 留言
     const toSendMessage = () => {
-      router.push("/form");
-    };
+      router.push('/form')
+    }
     // 头像
     const setAvatar = (id: string) => {
-      const dom = document.getElementById(id);
-      dom && getRandomAvatar(dom);
-    };
+      const dom = document.getElementById(id)
+      dom && getRandomAvatar(dom)
+    }
     const toStar = () => {
-      console.log("点赞");
-    };
+      console.log('点赞')
+    }
     const toComment = () => {
-      console.log("评论");
-    };
+      console.log('评论')
+    }
     onMounted(() => {
-      getMessages();
-    });
+      getMessages()
+    })
     return {
       ...toRefs(state),
       toBack,
@@ -184,13 +183,13 @@ export default defineComponent({
       onLoad,
       setAvatar,
       toStar,
-      toComment
-    };
-  }
-});
+      toComment,
+    }
+  },
+})
 </script>
 <style lang="less" scoped>
-@import "@/theme/hairline";
+@import '@/theme/hairline';
 .header {
   position: relative;
   padding-bottom: 50px;

@@ -1,7 +1,7 @@
 <template>
   <div class="mine">
     <div class="my-head">
-      <img :src="require('@/assets/images/banner1.jpg')" alt="" />
+      <img :src="banner1" alt="" />
       <span class="head-title">我的</span>
     </div>
     <div class="my-container" ref="container" :draggable="true" @touchstart="onDragStart($event)" @touchmove="onDragOver($event)" @touchend="onDragEnd($event)">
@@ -35,6 +35,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue'
+import banner1 from '@/assets/images/banner1.jpg'
 
 export default defineComponent({
   name: 'ABOUT',
@@ -80,7 +81,7 @@ export default defineComponent({
       }
     }
 
-    return { todos, state, onDragStart, onDragOver, onDragEnd, container }
+    return { todos, state, onDragStart, onDragOver, onDragEnd, container,banner1 }
   },
 })
 </script>

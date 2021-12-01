@@ -44,16 +44,16 @@
       <div>
         <van-swipe class="projects" :loop="false" :width="300">
           <van-swipe-item>
-            <img :src="require('@/assets/images/banner1.jpg')" alt="" />
+            <img :src="banner1" alt="" />
           </van-swipe-item>
           <van-swipe-item>
-            <img :src="require('@/assets/images/banner2.jpg')" alt="" />
+            <img :src="banner2" alt="" />
           </van-swipe-item>
           <van-swipe-item>
-            <img :src="require('@/assets/images/banner3.jpg')" alt="" />
+            <img :src="banner3" alt="" />
           </van-swipe-item>
           <van-swipe-item>
-            <img :src="require('@/assets/images/banner4.jpg')" alt="" />
+            <img :src="banner4" alt="" />
           </van-swipe-item>
         </van-swipe>
       </div>
@@ -93,6 +93,11 @@ import { getResouceList } from '@/api/resource'
 import { ResourceOption } from '@/entities/resource'
 import { menus, resource } from '@/mock/data'
 import Recommend from '@/components/Recommend.vue'
+
+import banner1 from '@/assets/images/banner1.jpg'
+import banner2 from '@/assets/images/banner2.jpg'
+import banner3 from '@/assets/images/banner3.jpg'
+import banner4 from '@/assets/images/banner4.jpg'
 export default defineComponent({
   name: 'HOME',
   components: {
@@ -152,7 +157,16 @@ export default defineComponent({
       getData()
     })
 
+    const getImageUrl = (path: string) => {
+      return new URL(path, import.meta.url).href
+    }
+
     return {
+      banner1,
+      banner2,
+      banner3,
+      banner4,
+      getImageUrl,
       ...toRefs(state),
       menus,
       toDetail,
