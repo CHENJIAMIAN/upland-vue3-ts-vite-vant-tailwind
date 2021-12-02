@@ -55,7 +55,7 @@ export default defineConfig({
             plugins: [
                 autoprefixer(),
                 pxtoviewport({
-                    viewportWidth: 375,
+                    viewportWidth: 500,
                 }),
             ],
         },

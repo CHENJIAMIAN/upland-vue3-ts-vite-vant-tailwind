@@ -92,13 +92,13 @@ import {
 import { getBeforeNowCount, getRandomAvatar } from '@/utils/utils'
 import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
-import img_1 from '../../assets/images/1.jpg'
-import img_2 from '../../assets/images/2.jpg'
-import img_qrcode from '../../assets/images/qrcode.jpg'
-import img_3 from '../../assets/images/3.jpg'
-import img_4 from '../../assets/images/4.jpg'
-import img_5 from '../../assets/images/5.jpg'
-import img_6 from '../../assets/images/6.jpg'
+import img_1 from 'src/assets/images/1.jpg'
+import img_2 from 'src/assets/images/2.jpg'
+import img_qrcode from 'src/assets/images/qrcode.jpg'
+import img_3 from 'src/assets/images/3.jpg'
+import img_4 from 'src/assets/images/4.jpg'
+import img_5 from 'src/assets/images/5.jpg'
+import img_6 from 'src/assets/images/6.jpg'
 
 export default defineComponent({
   name: 'MESSAGE',
