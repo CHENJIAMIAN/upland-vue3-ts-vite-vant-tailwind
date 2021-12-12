@@ -7,8 +7,8 @@ import store from './store';
 
 import Vant, { Toast } from 'vant';
 
-import './assets/style/reset.less';
-import './assets/style/global.less';
+import 'src/assets/style/reset.less';
+import 'src/assets/style/global.less';
 
 import 'vant/lib/index.less';
 

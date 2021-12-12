@@ -1,19 +1,8 @@
 <template>
   <div class="form">
-    <wx-bar
-      :submit-permission="!!message.length"
-      @submit="submit"
-      @back="toback"
-    />
+    <wx-bar :submit-permission="!!message.length" @submit="submit" @back="toback" />
     <div>
-      <van-field
-        v-model="message"
-        rows="2"
-        autosize
-        label=""
-        type="textarea"
-        placeholder="这一刻的想法..."
-      />
+      <van-field v-model="message" rows="2" autosize label type="textarea" placeholder="这一刻的想法..." />
     </div>
     <div class="upload">
       <van-uploader
@@ -31,7 +20,7 @@
 import { defineComponent, reactive, toRefs } from "vue";
 import { useRandomName } from "@/utils/utils";
 import { Toast } from "vant";
-import { BmobMessage } from "@/entities/bmob";
+
 import { useStore } from "vuex";
 import { UserState } from "@/store/modules/user";
 import { useRouter } from "vue-router";
@@ -49,9 +38,9 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore<{ user: UserState }>();
 
-    const form = new BmobMessage(
+    const form =
       reactive({ name: "", content: "", files: [], state: false })
-    );
+
 
     // 上传文件之前触发
     function beforeRead(file: File) {
@@ -69,12 +58,12 @@ export default defineComponent({
 
     //提交
     function submit() {
-      const form = new BmobMessage({
+      const form = {
         name: store.state.user.loginUser || useRandomName(),
         content: state.message,
         state: false,
         files: []
-      });
+      }
       form.create().then(() => {
         router.back();
       });

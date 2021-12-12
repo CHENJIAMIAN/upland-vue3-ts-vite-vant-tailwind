@@ -1,7 +1,7 @@
 <template>
   <app-container :appbar="false">
     <div class="header">
-      <img src="@assets/images/message_bg.gif" alt="" srcset="" />
+      <img src="@assets/images/message_bg.gif" alt srcset />
       <div class="action fl" @click="toBack">
         <van-icon name="arrow-left" size="20" />
       </div>
@@ -10,7 +10,7 @@
       </div>
       <div class="info">
         <div class="info-box">
-          <img src="@assets/images/avatar1.jpg" alt="" srcset="" />
+          <img src="@assets/images/avatar1.jpg" alt srcset />
           <div class="name">zhanzhan.wei</div>
         </div>
       </div>
@@ -20,9 +20,7 @@
         <div v-for="item in messages" :key="item.objectId" class="message-item">
           <div class="message-item-box">
             <div class="user">
-              <div :id="item.objectId" class="identicon">
-                {{ setAvatar(item.objectId) }}
-              </div>
+              <div :id="item.objectId" class="identicon">{{ setAvatar(item.objectId) }}</div>
             </div>
             <div class="msg-container">
               <div class="name">{{ item.name }}</div>
@@ -30,7 +28,7 @@
                 <div class="texts">{{ item.content }}</div>
                 <div class="imgs" v-if="item.files && item.files.length">
                   <template v-for="img in item.files">
-                    <img :key="img" v-if="img" :src="img" alt="" srcset="" />
+                    <img :key="img" v-if="img" :src="img" alt srcset />
                   </template>
                 </div>
               </div>
@@ -66,9 +64,7 @@
                 <span class="star-icon">
                   <van-icon name="like-o" size="12" />
                 </span>
-                <div class="star-item">
-                  zhanzhan.wei
-                </div>
+                <div class="star-item">zhanzhan.wei</div>
               </div>
               <div class="comments" v-if="item.name === 'zhanzhan.wei'">
                 <div class="comment-item">
@@ -84,28 +80,16 @@
   </app-container>
 </template>
 <script lang="ts">
-import {
-  MessageStateOPtion,
-  BmobMessage,
-  BmobMessageOption,
-} from '@/entities/bmob'
 import { getBeforeNowCount, getRandomAvatar } from '@/utils/utils'
 import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
-import img_1 from 'src/assets/images/1.jpg'
-import img_2 from 'src/assets/images/2.jpg'
-import img_qrcode from 'src/assets/images/qrcode.jpg'
-import img_3 from 'src/assets/images/3.jpg'
-import img_4 from 'src/assets/images/4.jpg'
-import img_5 from 'src/assets/images/5.jpg'
-import img_6 from 'src/assets/images/6.jpg'
 
 export default defineComponent({
   name: 'MESSAGE',
   setup(prop, context) {
     console.log('prop', context)
     const router = useRouter()
-    const stateObj: MessageStateOPtion = {
+    const stateObj = {
       messages: [],
       input: '',
       loading: false,
@@ -113,9 +97,8 @@ export default defineComponent({
     }
     const state = reactive(stateObj)
 
-    const form = new BmobMessage(
+    const form =
       reactive({ name: '', content: '', files: [], state: false })
-    )
 
     const toBack = () => {
       router.back()
@@ -135,7 +118,7 @@ export default defineComponent({
     }
     const getMessages = async () => {
       const messages = await form.findAll()
-      const init: BmobMessageOption = {
+      const init = {
         objectId: '1',
         name: 'zhanzhan.wei',
         content:
@@ -143,13 +126,6 @@ export default defineComponent({
         files: [
           'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3831337348,1544176931&fm=26&gp=0.jpg',
           'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=103133962,3138181394&fm=26&gp=0.jpg',
-          img_1,
-          img_2,
-          img_qrcode,
-          img_3,
-          img_4,
-          img_5,
-          img_6,
         ],
         state: false,
       }
@@ -189,7 +165,7 @@ export default defineComponent({
 })
 </script>
 <style lang="less" scoped>
-@import '@/theme/hairline';
+@import "@/theme/hairline";
 .header {
   position: relative;
   padding-bottom: 50px;
