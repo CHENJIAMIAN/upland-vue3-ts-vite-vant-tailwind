@@ -40,14 +40,25 @@ export default defineConfig({
         preprocessorOptions: {
             //配置less主题
             less: {
-                javascriptEnabled: true,
                 modifyVars: {
                     // 直接覆盖变量
-                    'text-color': '#111',
-                    'border-color': '#eee',
+                    // 'text-color': 'red',
+                    // 'border-color': 'red',
                     // 或者可以通过 less 文件覆盖（文件路径为绝对路径）
-                    hack: `true; @import "./src/theme/var.less";`,
+                    // hack: `true; @import  "${path.resolve(
+                    //     __dirname,
+                    //     'src/theme/var.less'
+                    // )}";`,
+                    // hack: `true; @import "${path.resolve(
+                    //     './src/theme/var.less'
+                    // )}";`,
+                    hack: `true;  @import "src/theme/var.less";`,
+                    // hack: `true; @import "${path.join(
+                    //     __dirname,
+                    //     './src/theme/var.less'
+                    // )}";`,
                 },
+                javascriptEnabled: true,
             },
         },
         //配置路vw vm适配

@@ -1,20 +1,25 @@
 <template>
-
   <div class="flex-col container">
     <div class="header">
       <div class="action fl" @click="router.back()">
         <van-icon name="arrow-left" size="20" color="black" />
       </div>
     </div>
+    <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white" height="400">
+      <van-swipe-item>1</van-swipe-item>
+      <van-swipe-item>2</van-swipe-item>
+      <van-swipe-item>3</van-swipe-item>
+      <van-swipe-item>4</van-swipe-item>
+    </van-swipe>
     <div class="flex-col btn-group">
       <div class="flex-col section_2">
         <div class="flex-col group_1">
-          <span class="text">{{adress}}</span>
+          <span class="text">{{ form.address }}</span>
           <div class="flex-row section_3">
             <span class="text_1">所有人</span>
             <div class="flex-row group_2">
               <img src="@/res/local/16383320513052924830.png" class="image_2" />
-              <span class="text_2">{{name}}</span>
+              <span class="text_2">{{ form.name }}</span>
             </div>
           </div>
         </div>
@@ -22,21 +27,21 @@
           <div class="flex-col">
             <div class="flex-col group_5">
               <span class="text_3">价格</span>
-              <span class="text_4">{{price}}</span>
+              <span class="text_4">{{ form.price }}</span>
             </div>
             <div class="flex-col group_6">
-              <span class="text_5">{{income}}</span>
+              <span class="text_5">{{ form.income }}</span>
               <span class="text_6">月收入</span>
             </div>
           </div>
           <div class="flex-col">
             <div class="flex-col group_8">
-              <span class="text_7">{{area}}</span>
+              <span class="text_7">{{ form.area }}</span>
               <span class="text_8">面积</span>
             </div>
             <div class="flex-col group_9">
               <span class="text_9">可获奖励</span>
-              <span class="text_10">{{reward}}</span>
+              <span class="text_10">{{ form.extraBonus }}</span>
             </div>
           </div>
         </div>
@@ -63,54 +68,64 @@
           <div @click="view_15OnClick" class="flex-col items-center text-wrapper">
             <span>求购</span>
           </div>
+          <van-button type="danger" @click="deletePlot">删除地块</van-button>
         </div>
-
       </div>
     </div>
   </div>
-
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { defineComponent, reactive, toRefs, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-export default defineComponent({
-  setup() {
-    const router = useRouter()
+import {
+  plotPOST,
+  plotGET,
+  plotDELETE,
+  plotGETbyId,
+} from 'src/api/resource.ts'
 
-    const view_11OnClick = () => {
-      router.push({ name: 'index' })
-    }
-    const view_12OnClick = () => {
-      router.push({ name: 'index' })
-    }
-
-    const view_13OnClick = () => {
-      router.push({ name: 'index' })
-    }
-    const view_14OnClick = () => {
-      router.push({ name: 'index' })
-    }
-    const view_15OnClick = () => {
-      router.push({ name: 'index' })
-    }
-
-    return {
-      router,
-      view_11OnClick,
-      view_12OnClick,
-      view_13OnClick,
-      view_14OnClick,
-      view_15OnClick,
-      adress: '灣仔皇后大道东200号利东街地下G31号舖',
-      name: 'Jack Ma',
-      price: '30,000',
-      income: '3,500',
-      area: '26',
-      reward: '3,000~5,000',
-    }
-  },
+const form = ref({
+  address: '灣仔皇后大道东200号利东街地下G31号舖2',
+  name: 'Jack Ma2',
+  price: '30,0002',
+  income: '3,5002',
+  area: '262',
+  extraBonus: '3,000~5,0002',
 })
+const router = useRouter()
+const id = router.currentRoute.value.params.id
+
+
+
+plotGETbyId(id).then(r => {
+  form.value = r.data
+})
+
+function deletePlot() {
+  plotDELETE(id).then(r => {
+    router.back()
+  })
+}
+
+const view_11OnClick = () => {
+  router.push({ name: 'index' })
+}
+const view_12OnClick = () => {
+  router.push({ name: 'index' })
+}
+
+const view_13OnClick = () => {
+  router.push({ name: 'index' })
+}
+const view_14OnClick = () => {
+  router.push({ name: 'index' })
+}
+const view_15OnClick = () => {
+  router.push({ name: 'index' })
+}
+
+
 </script>
 
 <style scoped lang="less">
@@ -124,6 +139,7 @@ export default defineComponent({
   .header {
     position: absolute;
     padding-bottom: 50px;
+    z-index: 1;
     .action {
       position: absolute;
       color: #ffffff;
@@ -135,7 +151,7 @@ export default defineComponent({
   }
   .section_1 {
     padding: 31px 8px 78px;
-    background-image: url('https://codefun-proj-user-res-1256085488.cos.ap-guangzhou.myqcloud.com/61a6f330dc329c00111167d0/61a6f385dc329c001111685c/16383320487150496914.png');
+    background-image: url("https://codefun-proj-user-res-1256085488.cos.ap-guangzhou.myqcloud.com/61a6f330dc329c00111167d0/61a6f385dc329c001111685c/16383320487150496914.png");
     background-position: 0px 0px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -171,10 +187,9 @@ export default defineComponent({
           line-height: 24px;
           white-space: nowrap;
           text-align: right;
-          width: 254px;
           overflow: hidden;
           display: inline-block;
-          max-width: 200px;
+          max-width: 400px;
           text-overflow: ellipsis;
         }
         .section_3 {
@@ -305,7 +320,9 @@ export default defineComponent({
           }
         }
         .equal-division-item_1 {
-          padding: 10px 0 3px 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           flex: 1 1 115px;
           background-color: rgb(255, 255, 255);
           border-radius: 10px;
@@ -355,5 +372,13 @@ export default defineComponent({
       }
     }
   }
+}
+
+.my-swipe .van-swipe-item {
+  color: #fff;
+  font-size: 20px;
+  line-height: 150px;
+  text-align: center;
+  background-color: #39a9ed;
 }
 </style>

@@ -1,18 +1,26 @@
 <template>
   <div class="mine">
     <div class="my-head">
-      <img :src="banner1" alt="" />
+      <img :src="banner1" alt />
       <span class="head-title">我的</span>
     </div>
-    <div class="my-container" ref="container" :draggable="true" @touchstart="onDragStart($event)" @touchmove="onDragOver($event)" @touchend="onDragEnd($event)">
+
+    <div
+      class="my-container"
+      ref="container"
+      :draggable="true"
+      @touchstart="onDragStart($event)"
+      @touchmove="onDragOver($event)"
+      @touchend="onDragEnd($event)"
+    >
       <div class="info-box">
         <div class="my-info">
           <div class="avatar">
-            <img src="@assets/images/avatar1.jpg" alt="" srcset="" />
+            <img src="@assets/images/avatar1.jpg" alt srcset />
           </div>
           <div class="intro">
             <div class="name">weizhanzhan</div>
-            <div class="desc">一只小前端✌</div>
+            <div class="desc">一只小前端✌1</div>
           </div>
         </div>
         <div class="more-info">
@@ -81,7 +89,7 @@ export default defineComponent({
       }
     }
 
-    return { todos, state, onDragStart, onDragOver, onDragEnd, container,banner1 }
+    return { todos, state, onDragStart, onDragOver, onDragEnd, container, banner1 }
   },
 })
 </script>

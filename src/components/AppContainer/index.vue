@@ -1,67 +1,57 @@
 <template>
-  <div class="container">
+  <div class="app-container">
     <div class="appbar" v-if="appbar">
-      <van-nav-bar
-        :title="title"
-        left-text="返回"
-        right-text=""
-        left-arrow
-        @click-left="onClickLeft"
-        @click-right="onClickRight"
-      />
+      <van-nav-bar :title="title" left-text="返回" right-text="" left-arrow @click-left="onClickLeft" @click-right="onClickRight" />
     </div>
-    <div class="content">
+    <div class="app-content">
       <slot></slot>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
-import { useRouter } from "vue-router";
+import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
 export default defineComponent({
-  name: "AppContainer",
+  name: 'AppContainer',
   props: {
     appbar: {
       type: Boolean,
-      default: true
+      default: true,
     },
     title: {
       type: String,
-      default: ""
+      default: '',
     },
     back: {
       type: String,
-      default: ""
-    }
+      default: '',
+    },
   },
   setup(prop, ctx) {
-    const router = useRouter();
+    const router = useRouter()
     const onClickLeft = () => {
-      router.back();
-      ctx.emit("click-left");
-    };
+      router.back()
+      ctx.emit('click-left')
+    }
     const onClickRight = () => {
-      ctx.emit("click-right");
-    };
+      ctx.emit('click-right')
+    }
     return {
       onClickLeft,
-      onClickRight
-    };
-  }
-});
+      onClickRight,
+    }
+  },
+})
 </script>
 <style lang="less">
 // @import "@assets/style/mixin.scss";
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+.app-container {
   .appbar {
     @include border-1px(#eeeeee, bottom);
     height: 47px;
     box-shadow: 1px 2px 3px #eeeeee;
   }
-  .content {
+  .app-content {
     flex: 1;
     overflow: auto;
   }

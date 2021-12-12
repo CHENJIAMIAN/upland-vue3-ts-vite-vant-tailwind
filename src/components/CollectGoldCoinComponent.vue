@@ -55,7 +55,8 @@ export default defineComponent({
   height: 100vh;
   overflow-y: auto;
   padding: 170px 0 90px;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgb(0 0 0 / 45%);
+  
   .list {
     padding-bottom: 25px;
     background-color: rgb(255, 255, 255);

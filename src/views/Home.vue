@@ -89,7 +89,6 @@
 import { defineComponent, reactive, toRefs, ref, onMounted } from 'vue'
 import { Notify } from 'vant'
 import { useRouter } from 'vue-router'
-import { getResouceList } from '@/api/resource'
 import { ResourceOption } from '@/entities/resource'
 import { menus, resource } from '@/mock/data'
 import Recommend from '@/components/Recommend.vue'
@@ -123,11 +122,6 @@ export default defineComponent({
     }
 
     const getData = () => {
-      getResouceList()
-        .then((result) => {
-          state.list = result
-        })
-        .catch()
     }
 
     function toCollectResource(resource: ResourceOption) {
@@ -157,16 +151,11 @@ export default defineComponent({
       getData()
     })
 
-    const getImageUrl = (path: string) => {
-      return new URL(path, import.meta.url).href
-    }
-
     return {
       banner1,
       banner2,
       banner3,
       banner4,
-      getImageUrl,
       ...toRefs(state),
       menus,
       toDetail,

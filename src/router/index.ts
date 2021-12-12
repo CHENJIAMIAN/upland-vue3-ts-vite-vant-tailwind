@@ -34,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
         ],
     },
     {
+        path: '/login',
+        name: 'LoginPage',
+        component: () => import('src/views/LoginPage.vue'),
+    },
+    {
         path: '/shop',
         name: 'SHOP',
         component: () => import('../views/shop/index.vue'),
@@ -54,7 +59,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/message/form.vue'),
     },
     {
-        path: '/PlotDetailPage',
+        path: '/PlotDetailPage/:id',
         name: 'PlotDetailPage',
         component: () => import('../views/PlotDetailPage.vue'),
     },
@@ -81,10 +86,9 @@ function RouterStack(router: Router) {
         if (!store.state.user.loginUser) {
             store.commit('setUserInfo', useRandomName());
         }
-        console.log('store', store.state.user.loginUser);
-
-        console.log(to, from);
-        console.log(provideStore.planList.value);
+        // console.log('store.state.user.loginUser', store.state.user.loginUser);
+        // console.log('to, from', to, from);
+        // console.log('provideStore.planList.value', provideStore.planList.value);
     });
     return router;
 }
