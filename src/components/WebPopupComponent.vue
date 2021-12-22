@@ -32,11 +32,11 @@
         </div>
 
         <div class="btn-group flex-row">
-          <div @click="view_9OnClick" class="justify-evenly grid-item items-center" style="background:#01B4FE;color:white;">
+          <div @click="view_9OnClick" class="justify-evenly grid-item items-center" style="background:#01B4FE;color:white;flex: 1;justify-content: center;">
             <img src="@/res/local/16383476693745430978.png" class="image_1" />
             <span>购买</span>
           </div>
-          <div @click="view_10OnClick" class="flex-col grid-item">
+          <!-- <div @click="view_10OnClick" class="flex-col grid-item">
             <div class="flex-row group_6 justify-center">
               <img src="@/res/local/16383476693747637892.png" class="image_2" />
               <span class="text_12">赶过去</span>
@@ -51,7 +51,7 @@
           </div>
           <div @click="view_6OnClick" class="flex-col items-center text-wrapper_2">
             <span>建设</span>
-          </div>
+          </div> -->
         </div>
 
       </div>

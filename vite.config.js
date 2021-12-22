@@ -8,9 +8,13 @@ import styleImport from 'vite-plugin-style-import';
 // https://vitejs.dev/config/
 export default defineConfig({
     server: {
+        fs: {
+            strict: false,
+        },
         port: 3001,
     },
-    define: {//条目将在开发期间定义为全局变量，并在构建期间静态替换,因为它是作为简单的文本替换实现的，无需任何语法分析，我们建议define仅将其用于 CONSTANTS。
+    define: {
+        //条目将在开发期间定义为全局变量，并在构建期间静态替换,因为它是作为简单的文本替换实现的，无需任何语法分析，我们建议define仅将其用于 CONSTANTS。
         // global: {},
     },
     resolve: {

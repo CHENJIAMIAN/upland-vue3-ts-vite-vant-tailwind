@@ -5,14 +5,15 @@
         <component :is="Component" />
       </keep-alive>
     </router-view>
-    <div class="bottom-bar">
+
+    <!-- <div class="bottom-bar">
       <van-tabbar v-model="active" active-color="#85a5ff">
         <van-tabbar-item name="/HomePage" icon="location-o">地图</van-tabbar-item>
         <van-tabbar-item name="/about" icon="diamond-o">发现</van-tabbar-item>
         <van-tabbar-item name="#">
-          <template #icon="props">
+          <template #icon="props"> -->
             <!-- <img :src="props.active ? icon.active : icon.inactive" /> -->
-            <div class="flex-col items-end group_4">
+            <!-- <div class="flex-col items-end group_4">
               <div class="flex-row section_6">
                 <span class="text_7">{{ amout2 }}</span>
                 <span class="text_8">MIB</span>
@@ -20,7 +21,7 @@
               <img src="@/res/remote/f89deecbf8a342c7793e709fa3979203.png" class="image_5" />
             </div>
           </template>
-        </van-tabbar-item>
+        </van-tabbar-item> -->
 
         <!-- <div class="flex-col items-center section_5">
           <img src="@/res/local/16383476051378359036.png" class="image_2" />
@@ -30,8 +31,8 @@
           <img src="@/res/local/16383476051375272679.png" class="image_2" />
           <span class="text_6">发现</span>
         </div>-->
-      </van-tabbar>
-    </div>
+      <!-- </van-tabbar>
+    </div> -->
   </div>
 </template>
 <script lang="ts">

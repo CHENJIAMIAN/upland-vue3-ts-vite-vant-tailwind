@@ -69,6 +69,7 @@
             <span>求购</span>
           </div>
           <van-button type="danger" @click="deletePlot">删除地块</van-button>
+          <van-button type="danger" @click="deletePlot">修改地块</van-button>
         </div>
       </div>
     </div>
