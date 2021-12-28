@@ -6,10 +6,9 @@
       </div>
     </div>
     <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white" height="400">
-      <van-swipe-item>1</van-swipe-item>
-      <van-swipe-item>2</van-swipe-item>
-      <van-swipe-item>3</van-swipe-item>
-      <van-swipe-item>4</van-swipe-item>
+      <van-swipe-item v-for="imgSrc in form.pictures">
+        <van-image :src="imgSrc" />
+      </van-swipe-item>
     </van-swipe>
     <div class="flex-col btn-group">
       <div class="flex-col section_2">
@@ -70,6 +69,7 @@
           </div>
           <van-button type="danger" @click="deletePlot">删除地块</van-button>
           <van-button type="danger" @click="deletePlot">修改地块</van-button>
+          <van-uploader :after-read="afterRead" />
         </div>
       </div>
     </div>
@@ -80,28 +80,63 @@
 import { defineComponent, reactive, toRefs, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
+  plotPUT,
   plotPOST,
   plotGET,
   plotDELETE,
   plotGETbyId,
-} from 'src/api/resource.ts'
+  uploadSingle,
+} from 'src/api/resource'
+import Overlay from 'ol/Overlay'
 
-const form = ref({
-  address: '灣仔皇后大道东200号利东街地下G31号舖2',
-  name: 'Jack Ma2',
-  price: '30,0002',
-  income: '3,5002',
-  area: '262',
-  extraBonus: '3,000~5,0002',
+const state = reactive({
+  form: {
+    address: '',
+    name: '',
+    price: '',
+    income: '',
+    area: '',
+    extraBonus: '',
+    pictures: []
+  }
 })
+let { form } = toRefs(state);
+let { form: form2 } = state;//测试响应式的区别
+//form是ref了需要通过 form.value 来设置
+
+
+
 const router = useRouter()
-const id = router.currentRoute.value.params.id
-
-
+const id = router.currentRoute.value.params.id as string;
 
 plotGETbyId(id).then(r => {
   form.value = r.data
+});
+
+onMounted(() => {
 })
+
+const afterRead = (file) => {
+  // 此时可以自行将文件上传至服务器
+  console.log('file', file);
+
+  let formData = new FormData();
+  //file是当前file对象, 此对象包含file和content
+  formData.append('file', file.file)
+
+  uploadSingle(formData).then(r => {
+    form.value.pictures.push(r.data.path);//包含了依赖的对象
+    form2.pictures.push(r.data.path);//不包含依赖的读写, 不触发更新
+
+
+    plotPUT({ ...form.value }).then((result) => { });
+  })
+
+};
+
+
+
+
 
 function deletePlot() {
   plotDELETE(id).then(r => {
@@ -169,8 +204,6 @@ const view_15OnClick = () => {
   }
   .btn-group {
     padding: 0 12px;
-    padding-top: 69px;
-    padding-bottom: 100px;
     position: absolute;
     bottom: 0;
     .section_2 {

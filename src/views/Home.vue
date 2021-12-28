@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <!-- {{afdsf}} -->
     <div class="page_header">
       <span class="page_title">首页</span>
       <div class="page_search">
@@ -97,6 +98,15 @@ import banner1 from '@/assets/images/banner1.jpg'
 import banner2 from '@/assets/images/banner2.jpg'
 import banner3 from '@/assets/images/banner3.jpg'
 import banner4 from '@/assets/images/banner4.jpg'
+
+import {
+  plotPOST,
+  plotGET,
+  plotDELETE,
+  plotGETbyId,
+  uploadSingle,
+} from 'src/api/resource'
+
 export default defineComponent({
   name: 'HOME',
   components: {
@@ -113,6 +123,7 @@ export default defineComponent({
     })
 
     const activeTopic = ref(0)
+    const afdsf= ref({})
 
     const toDetail = (path: string) => {
       router.push(path)
@@ -123,6 +134,9 @@ export default defineComponent({
 
     const getData = () => {
     }
+
+    // plotGET().then(r => afdsf.value = r.data);
+
 
     function toCollectResource(resource: ResourceOption) {
       Notify({
@@ -152,6 +166,7 @@ export default defineComponent({
     })
 
     return {
+      afdsf,
       banner1,
       banner2,
       banner3,

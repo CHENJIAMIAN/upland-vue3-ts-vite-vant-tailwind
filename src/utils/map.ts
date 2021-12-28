@@ -2,7 +2,7 @@ import { Fill, Stroke, Style, Text } from 'ol/style';
 import { Tile as TileLayer } from 'ol/layer';
 import { XYZ, BingMaps } from 'ol/source';
 
-export function getTileLayerUrl(tileLayerName) {
+export function getTileLayerUrl(tileLayerName:string) {
     const tk = `c375a378f0c4ac4a034d651fb21669fd`;
     // 随机从7个节点获取,负载均衡
     return `http://t{0-7}.tianditu.com/DataServer?T=${tileLayerName}&x={x}&y={y}&l={z}&tk=${tk}`;
@@ -15,7 +15,7 @@ export const tdtVec = new TileLayer({
         url: getTileLayerUrl('vec_w'),
         maxZoom:18
     }),
-});
+}as any);
 // 天地图矢量图层注记
 export const tdtVecNotation = new TileLayer({
     title: '天地图矢量图层注记',
@@ -24,7 +24,7 @@ export const tdtVecNotation = new TileLayer({
         url: getTileLayerUrl('cva_w'),
         maxZoom:18
     }),
-});
+}as any);
 
 export const googleMapLayer = new TileLayer({
     source: new XYZ({

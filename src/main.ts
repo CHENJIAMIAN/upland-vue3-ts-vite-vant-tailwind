@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 
+// @ts-ignore
 import App from './App.vue';
 
 import router from './router';
@@ -10,8 +11,10 @@ import Vant, { Toast } from 'vant';
 import 'src/assets/style/reset.less';
 import 'src/assets/style/global.less';
 
-import 'vant/lib/index.less';
 
+import './index.css'
+
+import 'vant/lib/index.less';
 
 const app = createApp(App);
 

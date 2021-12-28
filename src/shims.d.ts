@@ -1,9 +1,11 @@
 interface Window {
     olmap: any;
+    _AMapSecurityConfig: Object;
 }
 
-interface Options
-    extends import('ol/layer/BaseVector.js').Options<VectorSource<Geometry>> {
-    id?: string;
-    flag?: string;
+interface ImportMeta {
+    env: any;
 }
+
+declare module '*.vue';
+declare module '*.jpg';

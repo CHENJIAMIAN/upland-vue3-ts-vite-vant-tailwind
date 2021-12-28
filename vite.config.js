@@ -1,5 +1,6 @@
 import vue from '@vitejs/plugin-vue';
 import autoprefixer from 'autoprefixer';
+import tailwindcss from 'tailwindcss';
 import path from 'path';
 import pxtoviewport from 'postcss-px-to-viewport';
 import { defineConfig } from 'vite';
@@ -68,9 +69,13 @@ export default defineConfig({
         //配置路vw vm适配
         postcss: {
             plugins: [
+                tailwindcss(),
                 autoprefixer(),
                 pxtoviewport({
                     viewportWidth: 500,
+                    landscape: true,
+                    landscapeUnit: 'vw',
+                    landscapeWidth: 1500
                 }),
             ],
         },

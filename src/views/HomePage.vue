@@ -9,6 +9,14 @@
             @cancel="onCancel"
         />
         <div id="map-container" class="map-container"></div>
+        <div id="overlay-container">
+            <WebPopupComponent
+                :id="currentGroundId"
+                ref="webPopupComponent"
+                @show-modify="drawPolygonDialog?.toggleShow(true)"
+                @close="closeWebPopup"
+            />
+        </div>
         <div class="flex-col items-end btn-group">
             <!-- <div @click="earnCoinClick" class="flex-col items-center section_2">
         <span>获得</span>
@@ -42,7 +50,7 @@
             @click="router.push('/PlotDetailPage')"
         />-->
 
-        <DrawPolygonDialog ref="drawPolygonDialog" @close="getPlot()" />
+        <DrawPolygonDialog :id="currentGroundId" ref="drawPolygonDialog" @close="getPlot()" />
 
         <!-- <div @click="toMyLocationClick" class="flex-row to-my-location">
       <img src="@/res/local/16383475954254019054.png" class="image_1" />
@@ -68,11 +76,11 @@
         </div>-->
 
         <!-- <CollectGoldCoinComponent /> -->
-        <!-- <WebPopupComponent/> -->
     </div>
 </template>
 <script lang="ts">
 import Map from 'ol/Map';
+import Overlay from 'ol/Overlay';
 export let map: Map | null = null;
 </script>
 <script lang="ts" setup>
@@ -107,7 +115,7 @@ import {
 } from 'ol/layer';
 import Feature from 'ol/Feature';
 import { Circle, Point, Geometry } from 'ol/geom';
-import { GeometryType, SimpleGeometry } from 'ol/geom';
+import { SimpleGeometry } from 'ol/geom';
 import {
     Fill,
     Stroke,
@@ -118,7 +126,6 @@ import {
 } from 'ol/style';
 import { getCenter, containsExtent } from 'ol/extent';
 import { DragBox, Select } from 'ol/interaction';
-import Overlay from 'ol/Overlay';
 import {
     defaults as defaultControls, // 比例尺
 } from 'ol/control';
@@ -131,6 +138,7 @@ import { tdtVec, tdtVecNotation, googleMapLayer } from 'src/utils/map';
 import { transform, fromLonLat } from 'ol/proj';
 import Geolocation from 'ol/Geolocation';
 import DrawPolygonDialog from 'src/components/DrawPolygonDialog.vue';
+import BaseEvent from 'ol/events/event'
 
 import {
     plotPOST,
@@ -138,6 +146,7 @@ import {
     plotDELETE,
     plotGETbyId,
 } from 'src/api/resource';
+import { Options } from "ol/layer/BaseVector"
 
 const colorsMap: { [key: string]: string } = {
     cansale: 'green',
@@ -150,11 +159,14 @@ let amout2 = '2000';
 let amount = '750';
 const router = useRouter();
 
+const currentGroundId = ref('');
 const searchValue = ref('香港大学');
 const drawPolygonDialog = ref<InstanceType<typeof DrawPolygonDialog>>();
+const webPopupComponent = ref<InstanceType<typeof WebPopupComponent>>();
 
 let geolocation: Geolocation | null = null;
 let positionFeature: Feature<Geometry> | null = null;
+let overlay: Overlay | null = null;
 
 onMounted(() => {
     /*---------------------------------------------------------------------------------------*/
@@ -174,19 +186,30 @@ onMounted(() => {
         }),
         target: mapElement,
     });
+    let portrait = false;
     map.on('click', (evt) => {
-        map &&
-            map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (!layer) return;
-                const { id, flag } = layer.getProperties();
-                if (flag === 'plot') {
-                    router.push(`/PlotDetailPage/${id}`);
+        if (window.innerHeight > window.innerWidth) {
+            portrait = true;
+        } else {
+            portrait = false;
+        }
+        currentGroundId.value = '';
+        map?.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+            if (!layer) return;
+            const { id, flag } = layer.getProperties();
+            if (flag === 'plot') {
+                if (portrait) router.push(`/PlotDetailPage/${id}`);
+                else {
+                    const coord = map?.getCoordinateFromPixel(evt.pixel);
+                    overlay?.setPosition(coord);
+                    currentGroundId.value = id;
                 }
-            });
+            }
+        });
     });
     // 为什么缩放或单击地图时不正确/不正确？ https://openlayers.org/en/latest/doc/faq.html
     const sizeObserver = new ResizeObserver(() => {
-        map && map.updateSize();
+        map?.updateSize();
     });
     sizeObserver.observe(mapElement);
     // 定位
@@ -199,10 +222,9 @@ onMounted(() => {
     });
     const accuracyFeature = new Feature();
     geolocation.on('change:accuracyGeometry', function () {
-        geolocation &&
-            accuracyFeature.setGeometry(
-                geolocation.getAccuracyGeometry() as Geometry
-            );
+        accuracyFeature.setGeometry(
+            geolocation?.getAccuracyGeometry() as Geometry
+        );
     });
 
     positionFeature = new Feature();
@@ -235,8 +257,19 @@ onMounted(() => {
         }),
     });
     /*---------------------------------------------------------------------------------------*/
+    // 弹窗
+    overlay = new Overlay({
+        offset: [10, 10],
+        position: undefined,
+        element: document.getElementById('overlay-container') || undefined,
+    })
+    map?.addOverlay(overlay)
     getPlot();
 });
+
+function closeWebPopup() {
+    overlay?.setPosition(undefined)
+}
 
 function getPlot() {
     map?.getLayers()
@@ -255,11 +288,16 @@ function getPlot() {
                 }),
             });
 
+            interface Options2 extends Options<VectorSource<Geometry>> {
+                id?: string;
+                flag?: string;
+            }
+
             const layer = new VectorLayer({
                 id: ground._id,
                 flag: 'plot',
                 source: vectorSource,
-                style: function (feature) {
+                style: function () {
                     const style = new Style({
                         stroke: new Stroke({ width: 1, color: 'lightblue' }),
                         fill: new Fill({ color: colorsMap[ground.saleState] }),
@@ -273,7 +311,8 @@ function getPlot() {
                     });
                     return style;
                 },
-            });
+            } as Options2);
+            layer.setProperties(ground);
             map?.addLayer(layer);
             if (index === 0) {
                 map?.getView().fit(vectorSource?.getFeatures()[0]?.getGeometry() as SimpleGeometry);
@@ -291,8 +330,10 @@ const amountClick = () => {
 };
 const toMyLocationClick = () => {
     geolocation?.setTracking(true);
-    const changeListener = (e: Event) => {
-        const coord = e?.target?.getGeometry().getCoordinates();
+    const changeListener = (e: BaseEvent | Event) => {
+        if (!e.target) return;
+        const fea = e.target as Feature<Geometry>;
+        const coord = (fea?.getGeometry() as Point)?.getCoordinates();
         map?.getView().setCenter(coord);
         geolocation?.setTracking(false);
         positionFeature?.removeEventListener('change', changeListener);
@@ -333,17 +374,22 @@ const onCancel = () => Toast('取消');
 
 <style scoped lang="less">
 @search-hei: 50px;
+.van-search {
+    height: @search-hei;
+}
 .my-search {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1;
-    height: @search-hei;
 }
 .map-container {
     height: calc(100vh - @tabbar-height);
     margin-top: @search-hei;
+}
+#overlay-container {
+    transform: translate(0, -50%);
 }
 .btn-group {
     position: absolute;

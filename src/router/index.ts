@@ -14,21 +14,25 @@ const routes: Array<RouteRecordRaw> = [
         path: '/',
         name: 'LAYOUT',
         redirect: '/HomePage',
+        
         component: () => import('../views/layout/index.vue'),
         children: [
             {
                 path: 'home',
                 name: 'HOME',
+                
                 component: () => import('../views/Home.vue'),
             },
             {
                 path: 'about',
                 name: 'ABOUT',
+                
                 component: () => import('../views/About.vue'),
             },
             {
                 path: '/HomePage',
                 name: 'HomePage',
+                
                 component: () => import('../views/HomePage.vue'),
             },
         ],
@@ -36,31 +40,37 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/login',
         name: 'LoginPage',
+        
         component: () => import('src/views/LoginPage.vue'),
     },
     {
         path: '/shop',
         name: 'SHOP',
+        
         component: () => import('../views/shop/index.vue'),
     },
     {
         path: '/vuex',
         name: 'VUEX',
+        
         component: () => import('../views/vuex/index.vue'),
     },
     {
         path: '/message',
         name: 'MESSAGE',
+        
         component: () => import('../views/message/index.vue'),
     },
     {
         path: '/form',
         name: 'FORM',
+        
         component: () => import('../views/message/form.vue'),
     },
     {
         path: '/PlotDetailPage/:id',
         name: 'PlotDetailPage',
+        
         component: () => import('../views/PlotDetailPage.vue'),
     },
 ];
