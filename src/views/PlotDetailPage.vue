@@ -47,24 +47,24 @@
       </div>
       <div class="flex-col group_10">
         <div class="flex-row equal-division">
-          <div @click="view_11OnClick" class="justify-center equal-division-item">
+          <div @click="handleBuy" class="justify-center equal-division-item">
             <img src="@/res/local/16383476693745430978.png" class="image_3" />
             <span class="text_11">购买</span>
           </div>
-          <div @click="view_12OnClick" class="flex-col equal-division-item_1">
+          <div @click="handleGoTo" class="flex-col equal-division-item_1">
             <div class="flex-row group_11">
               <img src="@/res/local/16383476693747637892.png" class="image_4" />
               <span class="text_12">赶过去</span>
             </div>
             <span class="text_13">花费20MIB</span>
           </div>
-          <div @click="view_13OnClick" class="flex-col items-center equal-division-item_2">
+          <div @click="handleBuild" class="flex-col items-center equal-division-item_2">
             <span>建设</span>
           </div>
-          <div @click="view_14OnClick" class="flex-col items-center text-wrapper">
+          <div @click="handleCertBook" class="flex-col items-center text-wrapper">
             <span>属权证书</span>
           </div>
-          <div @click="view_15OnClick" class="flex-col items-center text-wrapper">
+          <div @click="handleRequestBuy" class="flex-col items-center text-wrapper">
             <span>求购</span>
           </div>
           <van-button type="danger" @click="deletePlot">删除地块</van-button>
@@ -89,6 +89,9 @@ import {
 } from 'src/api/resource'
 import Overlay from 'ol/Overlay'
 
+const router = useRouter()
+const id = router.currentRoute.value.params.id as string;
+
 const state = reactive({
   form: {
     address: '',
@@ -101,22 +104,10 @@ const state = reactive({
   }
 })
 let { form } = toRefs(state);
-let { form: form2 } = state;//测试响应式的区别
-//form是ref了需要通过 form.value 来设置
 
+plotGETbyId(id).then(r => form.value = r.data);
 
-
-const router = useRouter()
-const id = router.currentRoute.value.params.id as string;
-
-plotGETbyId(id).then(r => {
-  form.value = r.data
-});
-
-onMounted(() => {
-})
-
-const afterRead = (file) => {
+function afterRead (file)  {
   // 此时可以自行将文件上传至服务器
   console.log('file', file);
 
@@ -126,38 +117,29 @@ const afterRead = (file) => {
 
   uploadSingle(formData).then(r => {
     form.value.pictures.push(r.data.path);//包含了依赖的对象
-    form2.pictures.push(r.data.path);//不包含依赖的读写, 不触发更新
-
 
     plotPUT({ ...form.value }).then((result) => { });
   })
 
 };
-
-
-
-
-
 function deletePlot() {
   plotDELETE(id).then(r => {
     router.back()
   })
 }
-
-const view_11OnClick = () => {
+function handleBuy(){
   router.push({ name: 'index' })
 }
-const view_12OnClick = () => {
+function handleGoTo(){
   router.push({ name: 'index' })
 }
-
-const view_13OnClick = () => {
+function handleBuild(){
   router.push({ name: 'index' })
 }
-const view_14OnClick = () => {
+function handleCertBook(){
   router.push({ name: 'index' })
 }
-const view_15OnClick = () => {
+function handleRequestBuy(){
   router.push({ name: 'index' })
 }
 

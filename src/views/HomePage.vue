@@ -81,9 +81,6 @@
 <script lang="ts">
 import Map from 'ol/Map';
 import Overlay from 'ol/Overlay';
-export let map: Map | null = null;
-</script>
-<script lang="ts" setup>
 import {
     defineComponent,
     reactive,
@@ -130,15 +127,14 @@ import {
     defaults as defaultControls, // 比例尺
 } from 'ol/control';
 
-import CollectGoldCoinComponent from 'src/components/CollectGoldCoinComponent.vue';
-import WebPopupComponent from 'src/components/WebPopupComponent.vue';
 import { Toast } from 'vant';
 import axios from 'axios';
 import { tdtVec, tdtVecNotation, googleMapLayer } from 'src/utils/map';
 import { transform, fromLonLat } from 'ol/proj';
 import Geolocation from 'ol/Geolocation';
-import DrawPolygonDialog from 'src/components/DrawPolygonDialog.vue';
 import BaseEvent from 'ol/events/event'
+import { Options } from "ol/layer/BaseVector"
+
 
 import {
     plotPOST,
@@ -146,230 +142,275 @@ import {
     plotDELETE,
     plotGETbyId,
 } from 'src/api/resource';
-import { Options } from "ol/layer/BaseVector"
 
-const colorsMap: { [key: string]: string } = {
-    cansale: 'green',
-    saled: 'blue',
-    unsaled: 'gray',
-};
 
-let remainTime = '50mins';
-let amout2 = '2000';
-let amount = '750';
+export let map: Map | null = null;
+
+const useOlGetLocationEffect = () => {
+    // 定位
+    let geolocation: Geolocation | null = null;
+    let positionFeature: Feature<Geometry> | null = null;
+    onMounted(() => {
+        geolocation = new Geolocation({
+            // enableHighAccuracy must be set to true to have the heading value.
+            trackingOptions: {
+                enableHighAccuracy: true,
+            },
+            projection: map?.getView()?.getProjection(),
+        });
+        const accuracyFeature = new Feature();
+        geolocation.on('change:accuracyGeometry', function () {
+            accuracyFeature.setGeometry(
+                geolocation?.getAccuracyGeometry() as Geometry
+            );
+        });
+        positionFeature = new Feature();
+        positionFeature.setStyle(
+            new Style({
+                image: new CircleStyle({
+                    radius: 6,
+                    fill: new Fill({
+                        color: '#3399CC',
+                    }),
+                    stroke: new Stroke({
+                        color: '#fff',
+                        width: 2,
+                    }),
+                }),
+            })
+        );
+        geolocation.on('change:position', function () {
+            if (!geolocation || !positionFeature) return;
+            const coordinates = geolocation.getPosition();
+            positionFeature.setGeometry(
+                coordinates ? new Point(coordinates) as Geometry : undefined
+            );
+        });
+        map && new VectorLayer({
+            map: map,
+            source: new VectorSource({
+                features: [accuracyFeature, positionFeature],
+            }),
+        });
+    })
+    const toMyLocationClick = () => {
+        geolocation?.setTracking(true);
+        const changeListener = (e: BaseEvent | Event) => {
+            if (!e.target) return;
+            const fea = e.target as Feature<Geometry>;
+            const coord = (fea?.getGeometry() as Point)?.getCoordinates();
+            map?.getView().setCenter(coord);
+            geolocation?.setTracking(false);
+            positionFeature?.removeEventListener('change', changeListener);
+        };
+        positionFeature?.addEventListener('change', changeListener);
+    };
+    return { toMyLocationClick }
+}
+const useOlOverLayEffect = () => {
+    const router = useRouter();
+
+    let overlay: Overlay | null = null;
+    onMounted(() => {
+        // 弹窗
+        overlay = new Overlay({
+            offset: [10, 10],
+            position: undefined,
+            element: document.getElementById('overlay-container') || undefined,
+        })
+        map?.addOverlay(overlay)
+        // 点击弹窗
+        let portrait = false;
+        map?.on('click', (evt) => {
+            if (window.innerHeight > window.innerWidth) {
+                portrait = true;
+            } else {
+                portrait = false;
+            }
+            currentGroundId.value = '';
+            map?.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+                if (!layer) return;
+                const { id, flag } = layer.getProperties();
+                if (flag === 'plot') {
+                    if (portrait) router.push(`/PlotDetailPage/${id}`);
+                    else {
+                        const coord = map?.getCoordinateFromPixel(evt.pixel);
+                        overlay?.setPosition(coord);
+                        currentGroundId.value = id;
+                    }
+                }
+            });
+        });
+    })
+    const closeWebPopup = () => {
+        overlay?.setPosition(undefined)
+    }
+    return { overlay, closeWebPopup }
+}
+const useOlResizeObserverEffect = (id) => {
+    onMounted(() => {
+        const mapElement = document.querySelector(id) as HTMLElement;
+        // 为什么缩放或单击地图时不正确/不正确？ https://openlayers.org/en/latest/doc/faq.html
+        const sizeObserver = new ResizeObserver(() => {
+            map?.updateSize();
+        });
+        sizeObserver.observe(mapElement);
+    })
+}
+const useOlMapEffect = () => {
+    const currentGroundId = ref('');
+
+    const mapEleId = '#map-container';
+    onMounted(() => {
+        const mapElement = document.querySelector(mapEleId) as HTMLElement;
+        map = window.olmap = new Map({
+            controls: defaultControls({
+                attribution: false,
+            }),
+            // layers: [googleMapLayer],
+            layers: [tdtVec, tdtVecNotation],
+            view: new View({
+                center: [12709830.405784814, 2547947.6083460334],
+                zoom: 17,
+            }),
+            target: mapElement,
+        });
+    })
+    useOlResizeObserverEffect(mapEleId);
+    const { overlay, closeWebPopup } = useOlOverLayEffect();
+    const { toMyLocationClick } = useOlGetLocationEffect();
+
+    return { overlay, currentGroundId, closeWebPopup, toMyLocationClick }
+}
+const useSearchEffect = () => {
+    const searchValue = ref('香港大学');
+    // 高德 8b0d6e2489c6cc902fa56c6f2168e93d
+    const onSearch = (val: any) => {
+        axios
+            .get(
+                // `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=深圳`
+                `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=香港` //TODO:判断香港还是深圳
+            )
+            .then((res) => {
+                console.log(res);
+                if (res.data.geocodes.length === 0) return;
+                let location = res.data.geocodes[0].location.split(',');
+                let latitude = parseFloat(location[1]);
+                let longitude = parseFloat(location[0]);
+                map?.setView(
+                    new View({
+                        center: fromLonLat([longitude, latitude]),
+                        zoom: 16,
+                    })
+                );
+                console.log({
+                    location,
+                    latitude,
+                    longitude,
+                    name: res.data.geocodes[0].formatted_address,
+                    address: res.data.geocodes[0].formatted_address,
+                });
+            });
+    };
+    const onCancel = () => Toast('取消');
+    return { searchValue, onSearch, onCancel }
+}
+const useGetPlotEffect = () => {
+    const colorsMap: { [key: string]: string } = {
+        cansale: 'green',
+        saled: 'blue',
+        unsaled: 'gray',
+    };
+    const getPlot = () => {
+        map?.getLayers()
+            .getArray()
+            .filter((i) => (i as any).values_.flag === 'plot')
+            .forEach((i) => map?.removeLayer(i));
+
+        plotGET().then((r: { data: { list: any[]; }; }) => {
+            r.data.list.forEach((ground: { geojson: string; _id: string; saleState: string | number; address: any; }, index: number) => {
+                const geojsonObject = JSON.parse(ground.geojson);
+                let vectorSource = new VectorSource({
+                    // 转换坐标为3857(米)
+                    features: new GeoJSON().readFeatures(geojsonObject, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857',
+                    }),
+                });
+
+                interface Options2 extends Options<VectorSource<Geometry>> {
+                    id?: string;
+                    flag?: string;
+                }
+
+                const layer = new VectorLayer({
+                    id: ground._id,
+                    flag: 'plot',
+                    source: vectorSource,
+                    style: function () {
+                        const style = new Style({
+                            stroke: new Stroke({ width: 1, color: 'lightblue' }),
+                            fill: new Fill({ color: colorsMap[ground.saleState] }),
+                            text: new Text({
+                                font: 'normal 16px Arial',
+                                text: ground.address,
+                                fill: new Fill({
+                                    color: 'white',
+                                }),
+                            }),
+                        });
+                        return style;
+                    },
+                } as Options2);
+                layer.setProperties(ground);
+                map?.addLayer(layer);
+                if (index === 0) {
+                    map?.getView().fit(vectorSource?.getFeatures()[0]?.getGeometry() as SimpleGeometry);
+                    map?.getView().setZoom(17);
+                }
+            });
+        });
+    }
+
+    onMounted(() => {
+        getPlot();
+    });
+
+    return { getPlot }
+}
+
+</script>
+<script lang="ts" setup>
+import CollectGoldCoinComponent from 'src/components/CollectGoldCoinComponent.vue';
+import WebPopupComponent from 'src/components/WebPopupComponent.vue';
+import DrawPolygonDialog from 'src/components/DrawPolygonDialog.vue';
+
+// let remainTime = '50mins';
+// let amout2 = '2000';
+// let amount = '750';
 const router = useRouter();
 
-const currentGroundId = ref('');
-const searchValue = ref('香港大学');
 const drawPolygonDialog = ref<InstanceType<typeof DrawPolygonDialog>>();
 const webPopupComponent = ref<InstanceType<typeof WebPopupComponent>>();
 
-let geolocation: Geolocation | null = null;
-let positionFeature: Feature<Geometry> | null = null;
-let overlay: Overlay | null = null;
+const { currentGroundId, closeWebPopup } = useOlMapEffect();
 
-onMounted(() => {
-    /*---------------------------------------------------------------------------------------*/
-    const mapElement = document.querySelector('#map-container') as HTMLElement;
-    if (!mapElement) {
-        return;
-    }
-    map = window.olmap = new Map({
-        controls: defaultControls({
-            attribution: false,
-        }),
-        // layers: [googleMapLayer],
-        layers: [tdtVec, tdtVecNotation],
-        view: new View({
-            center: [12709830.405784814, 2547947.6083460334],
-            zoom: 17,
-        }),
-        target: mapElement,
-    });
-    let portrait = false;
-    map.on('click', (evt) => {
-        if (window.innerHeight > window.innerWidth) {
-            portrait = true;
-        } else {
-            portrait = false;
-        }
-        currentGroundId.value = '';
-        map?.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-            if (!layer) return;
-            const { id, flag } = layer.getProperties();
-            if (flag === 'plot') {
-                if (portrait) router.push(`/PlotDetailPage/${id}`);
-                else {
-                    const coord = map?.getCoordinateFromPixel(evt.pixel);
-                    overlay?.setPosition(coord);
-                    currentGroundId.value = id;
-                }
-            }
-        });
-    });
-    // 为什么缩放或单击地图时不正确/不正确？ https://openlayers.org/en/latest/doc/faq.html
-    const sizeObserver = new ResizeObserver(() => {
-        map?.updateSize();
-    });
-    sizeObserver.observe(mapElement);
-    // 定位
-    geolocation = new Geolocation({
-        // enableHighAccuracy must be set to true to have the heading value.
-        trackingOptions: {
-            enableHighAccuracy: true,
-        },
-        projection: map.getView().getProjection(),
-    });
-    const accuracyFeature = new Feature();
-    geolocation.on('change:accuracyGeometry', function () {
-        accuracyFeature.setGeometry(
-            geolocation?.getAccuracyGeometry() as Geometry
-        );
-    });
+const { searchValue, onSearch, onCancel } = useSearchEffect();
 
-    positionFeature = new Feature();
-    positionFeature.setStyle(
-        new Style({
-            image: new CircleStyle({
-                radius: 6,
-                fill: new Fill({
-                    color: '#3399CC',
-                }),
-                stroke: new Stroke({
-                    color: '#fff',
-                    width: 2,
-                }),
-            }),
-        })
-    );
+const { getPlot } = useGetPlotEffect();
 
-    geolocation.on('change:position', function () {
-        if (!geolocation || !positionFeature) return;
-        const coordinates = geolocation.getPosition();
-        positionFeature.setGeometry(
-            coordinates ? new Point(coordinates) as Geometry : undefined
-        );
-    });
-    new VectorLayer({
-        map: map,
-        source: new VectorSource({
-            features: [accuracyFeature, positionFeature],
-        }),
-    });
-    /*---------------------------------------------------------------------------------------*/
-    // 弹窗
-    overlay = new Overlay({
-        offset: [10, 10],
-        position: undefined,
-        element: document.getElementById('overlay-container') || undefined,
-    })
-    map?.addOverlay(overlay)
-    getPlot();
-});
 
-function closeWebPopup() {
-    overlay?.setPosition(undefined)
-}
 
-function getPlot() {
-    map?.getLayers()
-        .getArray()
-        .filter((i) => (i as any).values_.flag === 'plot')
-        .forEach((i) => map?.removeLayer(i));
 
-    plotGET().then((r: { data: { list: any[]; }; }) => {
-        r.data.list.forEach((ground: { geojson: string; _id: string; saleState: string | number; address: any; }, index: number) => {
-            const geojsonObject = JSON.parse(ground.geojson);
-            let vectorSource = new VectorSource({
-                // 转换坐标为3857(米)
-                features: new GeoJSON().readFeatures(geojsonObject, {
-                    dataProjection: 'EPSG:4326',
-                    featureProjection: 'EPSG:3857',
-                }),
-            });
+// const earnCoinClick = () => {
+//     router.push({ name: 'index' });
+// };
+// const amountClick = () => {
+//     router.push({ name: 'index' });
+// };
 
-            interface Options2 extends Options<VectorSource<Geometry>> {
-                id?: string;
-                flag?: string;
-            }
 
-            const layer = new VectorLayer({
-                id: ground._id,
-                flag: 'plot',
-                source: vectorSource,
-                style: function () {
-                    const style = new Style({
-                        stroke: new Stroke({ width: 1, color: 'lightblue' }),
-                        fill: new Fill({ color: colorsMap[ground.saleState] }),
-                        text: new Text({
-                            font: 'normal 16px Arial',
-                            text: ground.address,
-                            fill: new Fill({
-                                color: 'white',
-                            }),
-                        }),
-                    });
-                    return style;
-                },
-            } as Options2);
-            layer.setProperties(ground);
-            map?.addLayer(layer);
-            if (index === 0) {
-                map?.getView().fit(vectorSource?.getFeatures()[0]?.getGeometry() as SimpleGeometry);
-                map?.getView().setZoom(17);
-            }
-        });
-    });
-}
 
-const earnCoinClick = () => {
-    router.push({ name: 'index' });
-};
-const amountClick = () => {
-    router.push({ name: 'index' });
-};
-const toMyLocationClick = () => {
-    geolocation?.setTracking(true);
-    const changeListener = (e: BaseEvent | Event) => {
-        if (!e.target) return;
-        const fea = e.target as Feature<Geometry>;
-        const coord = (fea?.getGeometry() as Point)?.getCoordinates();
-        map?.getView().setCenter(coord);
-        geolocation?.setTracking(false);
-        positionFeature?.removeEventListener('change', changeListener);
-    };
-    positionFeature?.addEventListener('change', changeListener);
-};
-
-// 高德 8b0d6e2489c6cc902fa56c6f2168e93d
-const onSearch = (val: any) => {
-    axios
-        .get(
-            // `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=深圳`
-            `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=香港` //TODO:判断香港还是深圳
-        )
-        .then((res) => {
-            console.log(res);
-            if (res.data.geocodes.length === 0) return;
-            let location = res.data.geocodes[0].location.split(',');
-            let latitude = parseFloat(location[1]);
-            let longitude = parseFloat(location[0]);
-            map?.setView(
-                new View({
-                    center: fromLonLat([longitude, latitude]),
-                    zoom: 16,
-                })
-            );
-            console.log({
-                location,
-                latitude,
-                longitude,
-                name: res.data.geocodes[0].formatted_address,
-                address: res.data.geocodes[0].formatted_address,
-            });
-        });
-};
-const onCancel = () => Toast('取消');
 </script>
 
 <style scoped lang="less">
