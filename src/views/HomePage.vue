@@ -280,47 +280,38 @@ const useOlMapEffect = () => {
 }
 const useSearchEffect = () => {
     const searchValue = ref('香港大学');
-    let city = '香港';
 
-    onMounted(() => {
-        olmap.on('moveend', (e) => {
-            const coord = transform(e.map.getView().getCenter(), 'EPSG:3857', 'EPSG:4326');
-            if (!coord) return;
-            const coordStr = coord.join(',');
-            axios.get(`https://restapi.amap.com/v3/geocode/regeo?location=${coordStr}&key=f4a0557b75353764c6856b484fe49881&radius=10`)
-                .then((res) => {
-                    const addressComponent = res?.data?.regeocode?.addressComponent
-                    city = addressComponent.city.length > 0 ? addressComponent.city : addressComponent.province;
-                });
-        })
-    })
     // 高德 8b0d6e2489c6cc902fa56c6f2168e93d
-    const onSearch = (val: any) => {
-        axios
+    const onSearch = async (val: any) => {
+        const coord = transform(olmap.getView().getCenter(), 'EPSG:3857', 'EPSG:4326');
+        const coordStr = coord.join(',');
+        const res = await axios.get(`https://restapi.amap.com/v3/geocode/regeo?location=${coordStr}&key=f4a0557b75353764c6856b484fe49881&radius=10`)
+        const addressComponent = res?.data?.regeocode?.addressComponent
+        let city = addressComponent.city.length > 0 ? addressComponent.city : addressComponent.province;
+
+        const res2 = await axios
             .get(
                 // `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=深圳`
                 `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=${city}` //TODO:判断香港还是深圳
             )
-            .then((res) => {
-                console.log(res);
-                if (res.data.geocodes.length === 0) return;
-                let location = res.data.geocodes[0].location.split(',');
-                let latitude = parseFloat(location[1]);
-                let longitude = parseFloat(location[0]);
-                map?.setView(
-                    new View({
-                        center: fromLonLat([longitude, latitude]),
-                        zoom: 16,
-                    })
-                );
-                console.log({
-                    location,
-                    latitude,
-                    longitude,
-                    name: res.data.geocodes[0].formatted_address,
-                    address: res.data.geocodes[0].formatted_address,
-                });
-            });
+        console.log(res2);
+        if (res2?.data?.geocodes?.length === 0) return;
+        let location = res2?.data?.geocodes[0]?.location?.split(',');
+        let latitude = parseFloat(location[1]);
+        let longitude = parseFloat(location[0]);
+        map?.setView(
+            new View({
+                center: fromLonLat([longitude, latitude]),
+                zoom: 16,
+            })
+        );
+        console.log({
+            location,
+            latitude,
+            longitude,
+            name: res2.data.geocodes[0].formatted_address,
+            address: res2.data.geocodes[0].formatted_address,
+        });
     };
     const onCancel = () => Toast('取消');
     return { searchValue, onSearch, onCancel }
