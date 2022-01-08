@@ -26,5 +26,6 @@ window._AMapSecurityConfig = {
 
 app.use(store)
     .use(router)
+    .use(Toast)
     .use(Vant)
     .mount('#app');

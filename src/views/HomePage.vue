@@ -13,6 +13,7 @@
             <WebPopupComponent
                 :id="currentGroundId"
                 ref="webPopupComponent"
+                @deleted="getPlot()"
                 @show-modify="drawPolygonDialog?.toggleShow(true)"
                 @close="closeWebPopup"
             />
@@ -35,13 +36,8 @@
           <span>{{ remainTime }}</span>
         </div>
             </div>-->
-            <van-button
-                @click="
-                    () => {
-                        drawPolygonDialog?.root?.initAndStartDraw();
-                    }
-                "
-            >开始绘制</van-button>
+            <van-button @click="
+                                      ">开始绘制</van-button>
         </div>
 
         <!-- <img
@@ -208,6 +204,7 @@ const useOlGetLocationEffect = () => {
     return { toMyLocationClick }
 }
 const useOlOverLayEffect = () => {
+    const currentGroundId = ref('');
     const router = useRouter();
 
     let overlay: Overlay | null = null;
@@ -245,7 +242,7 @@ const useOlOverLayEffect = () => {
     const closeWebPopup = () => {
         overlay?.setPosition(undefined)
     }
-    return { overlay, closeWebPopup }
+    return { overlay, currentGroundId, closeWebPopup }
 }
 const useOlResizeObserverEffect = (id) => {
     onMounted(() => {
@@ -258,7 +255,6 @@ const useOlResizeObserverEffect = (id) => {
     })
 }
 const useOlMapEffect = () => {
-    const currentGroundId = ref('');
 
     const mapEleId = '#map-container';
     onMounted(() => {
@@ -267,8 +263,8 @@ const useOlMapEffect = () => {
             controls: defaultControls({
                 attribution: false,
             }),
-            // layers: [googleMapLayer],
-            layers: [tdtVec, tdtVecNotation],
+            layers: [googleMapLayer],
+            // layers: [tdtVec, tdtVecNotation],
             view: new View({
                 center: [12709830.405784814, 2547947.6083460334],
                 zoom: 17,
@@ -277,19 +273,33 @@ const useOlMapEffect = () => {
         });
     })
     useOlResizeObserverEffect(mapEleId);
-    const { overlay, closeWebPopup } = useOlOverLayEffect();
+    const { overlay, currentGroundId, closeWebPopup } = useOlOverLayEffect();
     const { toMyLocationClick } = useOlGetLocationEffect();
 
     return { overlay, currentGroundId, closeWebPopup, toMyLocationClick }
 }
 const useSearchEffect = () => {
     const searchValue = ref('香港大学');
+    let city = '香港';
+
+    onMounted(() => {
+        olmap.on('moveend', (e) => {
+            const coord = transform(e.map.getView().getCenter(), 'EPSG:3857', 'EPSG:4326');
+            if (!coord) return;
+            const coordStr = coord.join(',');
+            axios.get(`https://restapi.amap.com/v3/geocode/regeo?location=${coordStr}&key=f4a0557b75353764c6856b484fe49881&radius=10`)
+                .then((res) => {
+                    const addressComponent = res?.data?.regeocode?.addressComponent
+                    city = addressComponent.city.length > 0 ? addressComponent.city : addressComponent.province;
+                });
+        })
+    })
     // 高德 8b0d6e2489c6cc902fa56c6f2168e93d
     const onSearch = (val: any) => {
         axios
             .get(
                 // `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=深圳`
-                `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=香港` //TODO:判断香港还是深圳
+                `https://restapi.amap.com/v3/geocode/geo?key=f4a0557b75353764c6856b484fe49881&address=${val}&city=${city}` //TODO:判断香港还是深圳
             )
             .then((res) => {
                 console.log(res);

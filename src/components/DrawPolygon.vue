@@ -64,6 +64,14 @@
                     placeholder="地块图片（可修改）"
                     label="地块图片"
                 />-->
+                <van-field label="图片上传">
+                    <template #input>
+                        <van-uploader :after-read="afterRead" />
+                        <template v-if="form.pictures.length > 0" v-for="imgSrc in form.pictures">
+                            <van-image :src="imgSrc"  width="80"/>
+                        </template>
+                    </template>
+                </van-field>
             </van-cell-group>
 
             <!-- 每个元素的两侧间隔相等 -->
@@ -93,11 +101,13 @@ import {
     plotPUT,
     plotGET,
     plotGETbyId,
-    plotPOST
+    plotPOST,
+    uploadSingle,
 } from 'src/api/resource';
 import {
     nextTick, onMounted, onUnmounted, reactive, watch, watchEffect, toRefs, toRef
 } from 'vue';
+import { Toast } from 'vant';
 
 
 let drawLInteraction: Draw | null = null;
@@ -129,10 +139,11 @@ const state = reactive({
         income: '',
         extraBonus: '',
         saleState: 'cansale',
-        // pictures: '',
+        pictures: []
     }
 });
 let { form } = toRefs(state);
+let { form: form2 } = state;//测试响应式的区别
 
 watchEffect(() => {
     props.id && plotGETbyId(props.id).then(r => {
@@ -151,7 +162,34 @@ watch(
     }
 );
 
-onMounted(() => { });
+onMounted(() => {
+
+});
+
+nextTick(() => {
+    olmap.getViewport().oncontextmenu = (e) => {
+        Toast('取消绘制')
+        onCancel();
+    }
+})
+
+const afterRead = (file) => {
+    // 此时可以自行将文件上传至服务器
+    console.log('file', file);
+
+    let formData = new FormData();
+    //file是当前file对象, 此对象包含file和content
+    formData.append('file', file.file)
+
+    uploadSingle(formData).then(r => {
+        form.value.pictures.push(r.data.path);//包含了依赖的对象
+        form2.pictures.push(r.data.path);//不包含依赖的读写, 不触发更新
+
+
+        plotPUT({ ...form.value }).then((result) => { });
+    })
+
+};
 
 onUnmounted(() => {
     onCancel();

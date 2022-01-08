@@ -11,7 +11,7 @@
           <van-image :src="imgSrc" />
         </van-swipe-item>
         <van-swipe-item v-else>
-          <van-image  width="100%" height="100%"/>
+          <van-image width="100%" height="100%" />
         </van-swipe-item>
       </van-swipe>
 
@@ -44,7 +44,7 @@
       </div>
 
       <div class="grid gap-2 grid-cols-3 mx-2 -translate-y-8">
-        <div
+        <!-- <div
           @click="view_9OnClick"
           class="grid-item items-center justify-center bg-sky-400 text-white"
         >
@@ -68,10 +68,9 @@
           class="flex-col items-center grid-item bg-gray-300 border-gray-400"
         >
           <span>建设</span>
-        </div>
+        </div>-->
         <van-button type="danger" @click="deletePlot">删除地块</van-button>
         <van-button type="danger" @click="modifyPlot">修改地块</van-button>
-        <van-uploader :after-read="afterRead" />
       </div>
     </div>
 
@@ -88,10 +87,10 @@ import {
   plotGET,
   plotDELETE,
   plotGETbyId,
-  uploadSingle,
 } from 'src/api/resource'
 import Overlay from 'ol/Overlay'
-
+import { Toast } from 'vant';
+import { Dialog } from 'vant';
 const state = reactive({
   form: {
     address: '',
@@ -104,7 +103,6 @@ const state = reactive({
   }
 })
 let { form } = toRefs(state);
-let { form: form2 } = state;//测试响应式的区别
 //form是ref了需要通过 form.value 来设置
 
 const router = useRouter()
@@ -128,39 +126,35 @@ watchEffect(() => {
 onMounted(() => {
 })
 
-const afterRead = (file) => {
-  // 此时可以自行将文件上传至服务器
-  console.log('file', file);
 
-  let formData = new FormData();
-  //file是当前file对象, 此对象包含file和content
-  formData.append('file', file.file)
-
-  uploadSingle(formData).then(r => {
-    form.value.pictures.push(r.data.path);//包含了依赖的对象
-    form2.pictures.push(r.data.path);//不包含依赖的读写, 不触发更新
-
-
-    plotPUT({ ...form.value }).then((result) => { });
-  })
-
-};
 
 
 
 
 
 function deletePlot() {
-  plotDELETE(props.id).then(r => {
+  Dialog.confirm({
+    title: '确认删除吗 ?',
   })
+    .then(() => {
+      // on confirm
+      plotDELETE(props.id).then(r => {
+        Toast('地块已删除');
+        emit('deleted');
+        emit('close');
+      })
+    })
+    .catch(() => {
+      // on cancel
+    });
 }
-function modifyPlot(){
+function modifyPlot() {
   emit('show-modify')
 }
 
 
 
-const emit = defineEmits(['close','show-modify']);
+const emit = defineEmits(['close', 'show-modify', 'deleted']);
 
 const view_9OnClick = () => {
   router.push({ name: 'index' })
@@ -183,7 +177,7 @@ const view_6OnClick = () => {
 
 <style scoped lang="less">
 .group {
-  @group-width: 400px; //213px;
+  @group-width: 300px; //213px;
 
   padding-top: 10.5px;
   width: @group-width;
@@ -241,8 +235,8 @@ const view_6OnClick = () => {
     width: 30px;
     height: 30px;
     position: absolute;
-    right: 0;
     top: 0;
+    right:0;
   }
 }
 </style>
