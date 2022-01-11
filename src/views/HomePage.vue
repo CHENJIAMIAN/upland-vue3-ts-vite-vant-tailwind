@@ -36,8 +36,13 @@
           <span>{{ remainTime }}</span>
         </div>
             </div>-->
-            <van-button @click="
-                                      ">开始绘制</van-button>
+            <van-button
+                @click="
+                    () => {
+                        drawPolygonDialog?.root?.initAndStartDraw();
+                    }
+                "
+            >开始绘制</van-button>
         </div>
 
         <!-- <img
@@ -131,6 +136,9 @@ import Geolocation from 'ol/Geolocation';
 import BaseEvent from 'ol/events/event'
 import { Options } from "ol/layer/BaseVector"
 
+import GoogleLayer from 'olgm/layer/Google';
+import { defaults } from 'olgm/interaction';
+import OLGoogleMaps from 'olgm/OLGoogleMaps';
 
 import {
     plotPOST,
@@ -257,13 +265,16 @@ const useOlResizeObserverEffect = (id) => {
 const useOlMapEffect = () => {
 
     const mapEleId = '#map-container';
+    const googleLayer = new GoogleLayer();
+
     onMounted(() => {
         const mapElement = document.querySelector(mapEleId) as HTMLElement;
         map = window.olmap = new Map({
+            interactions: defaults(),
             controls: defaultControls({
                 attribution: false,
             }),
-            layers: [googleMapLayer],
+            layers: [googleLayer],
             // layers: [tdtVec, tdtVecNotation],
             view: new View({
                 center: [12709830.405784814, 2547947.6083460334],
@@ -271,6 +282,9 @@ const useOlMapEffect = () => {
             }),
             target: mapElement,
         });
+
+        var olGM = new OLGoogleMaps({ map: map }); // map is the ol.Map instance
+        olGM.activate();
     })
     useOlResizeObserverEffect(mapEleId);
     const { overlay, currentGroundId, closeWebPopup } = useOlOverLayEffect();
@@ -412,10 +426,11 @@ const { getPlot } = useGetPlotEffect();
 
 
 
-</script>
+    </script>
 
 <style scoped lang="less">
 @search-hei: 50px;
+
 .van-search {
     height: @search-hei;
 }

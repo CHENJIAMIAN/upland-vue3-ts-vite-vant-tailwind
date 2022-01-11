@@ -9,20 +9,24 @@ import store from './store';
 import Vant, { Toast } from 'vant';
 
 import 'src/assets/style/reset.less';
-import 'src/assets/style/global.less';
 
-
-import './index.css'
+import './index.css';
 
 import 'vant/lib/index.less';
+
+import 'swiper/css';
+import "swiper/css/pagination"
+
+import 'src/assets/style/global.less';
 
 const app = createApp(App);
 
 app.config.globalProperties.$toast = Toast;
 
 window._AMapSecurityConfig = {
-    securityJsCode:'054eaba337dbf1528e915453889888e5',
-}
+    securityJsCode: '054eaba337dbf1528e915453889888e5',
+};
+
 
 app.use(store)
     .use(router)

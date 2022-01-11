@@ -5,11 +5,11 @@
         <van-icon name="arrow-left" size="20" color="black" />
       </div>
     </div>
-    <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white" height="400">
-      <van-swipe-item v-for="imgSrc in form.pictures">
-        <van-image :src="imgSrc" />
-      </van-swipe-item>
-    </van-swipe>
+    <swiper ref="mySwiper" class="my-swipe rounded-t-xl" :pagination="pagination">
+      <swiper-slide v-if="form.pictures.length > 0" v-for="imgSrc in form.pictures">
+        <img :src="imgSrc" draggable="false" />
+      </swiper-slide>
+    </swiper>
     <div class="flex-col btn-group">
       <div class="flex-col section_2">
         <div class="flex-col group_1">
@@ -89,6 +89,18 @@ import {
 } from 'src/api/resource'
 import Overlay from 'ol/Overlay'
 
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import SwiperCore, {
+  Pagination
+} from 'swiper';
+SwiperCore.use([Pagination]);
+const pagination = {
+  "clickable": true,
+  "renderBullet": function (index, className) {
+    return '<span class=\"' + className + '\"></span>';
+  }
+}
+
 const router = useRouter()
 const id = router.currentRoute.value.params.id as string;
 
@@ -107,7 +119,7 @@ let { form } = toRefs(state);
 
 plotGETbyId(id).then(r => form.value = r.data);
 
-function afterRead (file)  {
+function afterRead(file) {
   // 此时可以自行将文件上传至服务器
   console.log('file', file);
 
@@ -127,19 +139,19 @@ function deletePlot() {
     router.back()
   })
 }
-function handleBuy(){
+function handleBuy() {
   router.push({ name: 'index' })
 }
-function handleGoTo(){
+function handleGoTo() {
   router.push({ name: 'index' })
 }
-function handleBuild(){
+function handleBuild() {
   router.push({ name: 'index' })
 }
-function handleCertBook(){
+function handleCertBook() {
   router.push({ name: 'index' })
 }
-function handleRequestBuy(){
+function handleRequestBuy() {
   router.push({ name: 'index' })
 }
 

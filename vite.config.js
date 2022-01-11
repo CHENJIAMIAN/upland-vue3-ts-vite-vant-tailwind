@@ -71,12 +71,12 @@ export default defineConfig({
             plugins: [
                 tailwindcss(),
                 autoprefixer(),
-                pxtoviewport({
-                    viewportWidth: 500,
-                    landscape: true,
-                    landscapeUnit: 'vw',
-                    landscapeWidth: 1500
-                }),
+                // pxtoviewport({
+                //     viewportWidth: 500,
+                //     landscape: true,
+                //     landscapeUnit: 'vw',
+                //     landscapeWidth: 1500
+                // }),
             ],
         },
     },

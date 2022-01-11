@@ -1,19 +1,23 @@
 <template>
   <div class="group">
     <div class="flex-col group-content justify-end">
-      <van-swipe
-        class="my-swipe rounded-t-xl"
-        :autoplay="3000"
-        indicator-color="white"
-        height="200"
-      >
+      <!-- <van-swipe indicator-color="white" height="200">
         <van-swipe-item v-if="form.pictures.length > 0" v-for="imgSrc in form.pictures">
-          <van-image :src="imgSrc" />
+          <img :src="imgSrc" draggable="false" />
         </van-swipe-item>
         <van-swipe-item v-else>
           <van-image width="100%" height="100%" />
         </van-swipe-item>
-      </van-swipe>
+        <template #indicator="{ active, total }">
+          <div class="custom-indicator">{{ active + 1 }}/{{ total }}</div>
+        </template>
+      </van-swipe>-->
+
+      <swiper ref="mySwiper" class="my-swipe rounded-t-xl" :pagination="pagination">
+        <swiper-slide v-if="form.pictures.length > 0" v-for="imgSrc in form.pictures">
+          <img :src="imgSrc" draggable="false" />
+        </swiper-slide>
+      </swiper>
 
       <div class="flex flex-col mx-2 -translate-y-10 rounded-md p-5 shadow-md bg-white">
         <div class="text-gray-500 text-center text-xl">{{ form.address || 'address' }}</div>
@@ -69,8 +73,8 @@
         >
           <span>建设</span>
         </div>-->
-        <van-button type="danger" @click="deletePlot">删除地块</van-button>
-        <van-button type="danger" @click="modifyPlot">修改地块</van-button>
+        <van-button type="primary" @click="deletePlot">删除地块</van-button>
+        <van-button type="primary" @click="modifyPlot">修改地块</van-button>
       </div>
     </div>
 
@@ -91,6 +95,19 @@ import {
 import Overlay from 'ol/Overlay'
 import { Toast } from 'vant';
 import { Dialog } from 'vant';
+
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import SwiperCore, {
+  Pagination
+} from 'swiper';
+SwiperCore.use([Pagination]);
+const pagination = {
+  "clickable": true,
+  "renderBullet": function (index, className) {
+    return '<span class=\"' + className + '\"></span>';
+  }
+}
+
 const state = reactive({
   form: {
     address: '',
@@ -185,7 +202,6 @@ const view_6OnClick = () => {
   position: relative;
 
   .group-content {
-    overflow: hidden;
     border-radius: 14px;
     background-color: rgb(255, 255, 255);
     border: solid 2.5px rgb(0, 181, 255);
@@ -236,7 +252,32 @@ const view_6OnClick = () => {
     height: 30px;
     position: absolute;
     top: 0;
-    right:0;
+    right: 0;
+  }
+}
+.custom-indicator {
+  transform: translateY(-50px);
+}
+
+.swiper {
+  :deep(.swiper-pagination-bullet-custom) {
+    @size: 20px;
+    width: @size !important;
+    height: @size !important;
+    line-height: @size !important;
+    text-align: center;
+    color: #353535;
+    opacity: 0.7;
+    background: rgba(#353535, 0.2);
+    transition: all 0.25s;
+    &:hover {
+      opacity: 1;
+    }
+    &.swiper-pagination-bullet-active {
+      opacity: 1;
+      color: #ffffff;
+      background: #007aff;
+    }
   }
 }
 </style>
