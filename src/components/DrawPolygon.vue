@@ -66,9 +66,26 @@
                 />-->
                 <van-field label="图片上传">
                     <template #input>
-                        <van-uploader :after-read="afterRead" />
+                        <van-uploader :after-read="afterRead" deletable />
                         <template v-if="form.pictures.length > 0" v-for="imgSrc in form.pictures">
-                            <van-image :src="imgSrc"  width="80"/>
+                            <van-image :src="imgSrc" width="80">
+                                <div
+                                    role="button"
+                                    class="van-uploader__preview-delete"
+                                    tabindex="0"
+                                    aria-label="删除"
+                                    @click="removeImg(imgSrc)"
+                                >
+                                    <i
+                                        class="van-badge__wrapper van-icon van-icon-cross van-uploader__preview-delete-icon"
+                                        style="transform: scale(0.7) translate(10%, -60%);"
+                                    >
+                                        <!---->
+                                        <!---->
+                                        <!---->
+                                    </i>
+                                </div>
+                            </van-image>
                         </template>
                     </template>
                 </van-field>
@@ -123,27 +140,29 @@ const props = defineProps({
     }
 })
 
-const state = reactive({
-    form: {
-        styleColor: 'rgba(10, 73, 140, 0.8)',
-        // 
-        geojson: '',
-        //
-        address: '',
-        rightPerson: '',
-        // "rightPersonName": "",
-        // "rightPersonAvatar": "",
-        price: '',
-        area: '',
-        // "level": "",
-        income: '',
-        extraBonus: '',
-        saleState: 'cansale',
-        pictures: []
+const getInitalState = () => {
+    return {
+        form: {
+            styleColor: 'rgba(10, 73, 140, 0.8)',
+            // 
+            geojson: '',
+            //
+            address: '',
+            rightPerson: '',
+            // "rightPersonName": "",
+            // "rightPersonAvatar": "",
+            price: '',
+            area: '',
+            // "level": "",
+            income: '',
+            extraBonus: '',
+            saleState: 'cansale',
+            pictures: []
+        }
     }
-});
+}
+const state = reactive(getInitalState());
 let { form } = toRefs(state);
-let { form: form2 } = state;//测试响应式的区别
 
 watchEffect(() => {
     props.id && plotGETbyId(props.id).then(r => {
@@ -152,7 +171,7 @@ watchEffect(() => {
 })
 
 
-const emit = defineEmits(['drawend', 'close']);
+const emit = defineEmits(['drawend', 'close', 'submit']);
 defineExpose({ initAndStartDraw, onSubmit, onCancel });
 
 watch(
@@ -183,7 +202,6 @@ const afterRead = (file) => {
 
     uploadSingle(formData).then(r => {
         form.value.pictures.push(r.data.path);//包含了依赖的对象
-        form2.pictures.push(r.data.path);//不包含依赖的读写, 不触发更新
 
 
         plotPUT({ ...form.value }).then((result) => { });
@@ -221,6 +239,10 @@ function onSubmit() {
     } else {
         plotPOST({ ...form.value }).then((result) => { });
     }
+    setTimeout(() => {
+        //等一会
+        emit('submit');
+    }, 500);
 
     // if (drawS?.getFeatures()?.length < 1) {
     //     $message.error('未绘制图层');
@@ -228,12 +250,22 @@ function onSubmit() {
     // }
 }
 
+function removeImg(src: string) {
+    let index = form.value.pictures.indexOf(src);
+    if (index > -1) {
+        form.value.pictures.splice(index, 1);
+        plotPUT({ ...form.value }).then((result) => { });
+    }
+}
+
+
 function onCancel() {
     if (!olmap || !drawS) return;
     olmap.removeInteraction(drawLInteraction);
     olmap.removeInteraction(modifyLInteraction);
     drawS.clear();
     olmap.removeLayer(drawL);
+    Object.assign(state, getInitalState())
     emit('close');
 }
 

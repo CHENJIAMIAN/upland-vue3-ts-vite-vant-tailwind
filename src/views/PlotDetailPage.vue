@@ -67,8 +67,7 @@
           <div @click="handleRequestBuy" class="flex-col items-center text-wrapper">
             <span>求购</span>
           </div>
-          <van-button type="danger" @click="deletePlot">删除地块</van-button>
-          <van-button type="danger" @click="deletePlot">修改地块</van-button>
+          <van-button type="danger" style="width: 100%;">编辑</van-button>
           <van-uploader :after-read="afterRead" />
         </div>
       </div>

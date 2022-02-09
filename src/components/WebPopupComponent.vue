@@ -20,8 +20,8 @@
       </swiper>
 
       <div class="flex flex-col mx-2 -translate-y-10 rounded-md p-5 shadow-md bg-white">
-        <div class="text-gray-500 text-center text-xl">{{ form.address || 'address' }}</div>
-        <div class="flex-row bg-gray-300 rounded-md p-2">
+        <div class="text-gray-500 text-center text-base">{{ form.address || 'address' }}</div>
+        <div class="flex-row bg-gray-200 rounded-md p-2">
           <span class="text-xs text-gray-800">所有人</span>
           <span class="grow text-center text-xl">{{ form.name || 'name' }}</span>
         </div>
@@ -47,7 +47,7 @@
         </div>
       </div>
 
-      <div class="grid gap-2 grid-cols-3 mx-2 -translate-y-8">
+      <div class="mx-2 -translate-y-8">
         <!-- <div
           @click="view_9OnClick"
           class="grid-item items-center justify-center bg-sky-400 text-white"
@@ -73,8 +73,7 @@
         >
           <span>建设</span>
         </div>-->
-        <van-button type="primary" @click="deletePlot">删除地块</van-button>
-        <van-button type="primary" @click="modifyPlot">修改地块</van-button>
+        <van-button type="primary" @click="modifyPlot" style="width: 100%;">编辑</van-button>
       </div>
     </div>
 

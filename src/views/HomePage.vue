@@ -51,7 +51,12 @@
             @click="router.push('/PlotDetailPage')"
         />-->
 
-        <DrawPolygonDialog :id="currentGroundId" ref="drawPolygonDialog" @close="getPlot()" />
+        <DrawPolygonDialog
+            :id="currentGroundId"
+            ref="drawPolygonDialog"
+            @close="currentGroundId = '', getPlot()"
+            @submit="getPlot()"
+        />
 
         <!-- <div @click="toMyLocationClick" class="flex-row to-my-location">
       <img src="@/res/local/16383475954254019054.png" class="image_1" />
@@ -266,6 +271,7 @@ const useOlMapEffect = () => {
 
     const mapEleId = '#map-container';
     const googleLayer = new GoogleLayer();
+    const center = [12709830.405784814, 2547947.6083460334];
 
     onMounted(() => {
         const mapElement = document.querySelector(mapEleId) as HTMLElement;
@@ -277,7 +283,7 @@ const useOlMapEffect = () => {
             layers: [googleLayer],
             // layers: [tdtVec, tdtVecNotation],
             view: new View({
-                center: [12709830.405784814, 2547947.6083460334],
+                center,
                 zoom: 17,
             }),
             target: mapElement,
@@ -343,6 +349,8 @@ const useGetPlotEffect = () => {
             .forEach((i) => map?.removeLayer(i));
 
         plotGET().then((r: { data: { list: any[]; }; }) => {
+            const center = map?.getView()?.getCenter();
+
             r.data.list.forEach((ground: { geojson: string; _id: string; saleState: string | number; address: any; }, index: number) => {
                 const geojsonObject = JSON.parse(ground.geojson);
                 let vectorSource = new VectorSource({
@@ -362,24 +370,23 @@ const useGetPlotEffect = () => {
                     id: ground._id,
                     flag: 'plot',
                     source: vectorSource,
-                    style: function () {
-                        const style = new Style({
-                            stroke: new Stroke({ width: 1, color: 'lightblue' }),
-                            fill: new Fill({ color: colorsMap[ground.saleState] }),
-                            text: new Text({
-                                font: 'normal 16px Arial',
-                                text: ground.address,
-                                fill: new Fill({
-                                    color: 'white',
-                                }),
-                            }),
-                        });
-                        return style;
-                    },
                 } as Options2);
+                const style = new Style({
+                    stroke: new Stroke({ width: 1, color: 'lightblue' }),
+                    fill: new Fill({ color: colorsMap[ground.saleState] }),
+                    text: new Text({
+                        font: 'normal 16px Arial',
+                        text: ground.address,
+                        fill: new Fill({
+                            color: 'white',
+                        }),
+                    }),
+                });
                 layer.setProperties(ground);
+                layer.getSource().getFeatures().forEach(i => i.setStyle(style))
                 map?.addLayer(layer);
-                if (index === 0) {
+                if (index === 0 && center && center[0] === 12709830.405784814) {
+                    console.log(center);
                     map?.getView().fit(vectorSource?.getFeatures()[0]?.getGeometry() as SimpleGeometry);
                     map?.getView().setZoom(17);
                 }
@@ -426,7 +433,7 @@ const { getPlot } = useGetPlotEffect();
 
 
 
-    </script>
+</script>
 
 <style scoped lang="less">
 @search-hei: 50px;
