@@ -260,12 +260,13 @@ function removeImg(src: string) {
 
 
 function onCancel() {
-    if (!olmap || !drawS) return;
+    if (!olmap) return;
     olmap.removeInteraction(drawLInteraction);
     olmap.removeInteraction(modifyLInteraction);
-    drawS.clear();
+    drawS?.clear();
     olmap.removeLayer(drawL);
     Object.assign(state, getInitalState())
+    console.log('src/components/DrawPolygon.vue onCancel');
     emit('close');
 }
 

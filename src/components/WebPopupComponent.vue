@@ -20,7 +20,7 @@
       </swiper>
 
       <div class="flex flex-col mx-2 -translate-y-10 rounded-md p-5 shadow-md bg-white">
-        <div class="text-gray-500 text-center text-base">{{ form.address || 'address' }}</div>
+        <div class="text-gray-500 text-center text-base break-all" style="display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">{{ form.address || 'address' }}</div>
         <div class="flex-row bg-gray-200 rounded-md p-2">
           <span class="text-xs text-gray-800">所有人</span>
           <span class="grow text-center text-xl">{{ form.name || 'name' }}</span>
@@ -144,33 +144,13 @@ onMounted(() => {
 
 
 
-
-
-
-
-function deletePlot() {
-  Dialog.confirm({
-    title: '确认删除吗 ?',
-  })
-    .then(() => {
-      // on confirm
-      plotDELETE(props.id).then(r => {
-        Toast('地块已删除');
-        emit('deleted');
-        emit('close');
-      })
-    })
-    .catch(() => {
-      // on cancel
-    });
-}
 function modifyPlot() {
   emit('show-modify')
 }
 
 
 
-const emit = defineEmits(['close', 'show-modify', 'deleted']);
+const emit = defineEmits(['close', 'show-modify']);
 
 const view_9OnClick = () => {
   router.push({ name: 'index' })

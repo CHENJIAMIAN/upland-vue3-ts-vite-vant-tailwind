@@ -13,7 +13,6 @@
             <WebPopupComponent
                 :id="currentGroundId"
                 ref="webPopupComponent"
-                @deleted="getPlot()"
                 @show-modify="drawPolygonDialog?.toggleShow(true)"
                 @close="closeWebPopup"
             />
@@ -53,8 +52,8 @@
 
         <DrawPolygonDialog
             :id="currentGroundId"
-            ref="drawPolygonDialog"
-            @close="currentGroundId = '', getPlot()"
+            ref="drawPolygonDialog"    
+            @close="drawPolygonDialogClosed"
             @submit="getPlot()"
         />
 
@@ -422,6 +421,12 @@ const { searchValue, onSearch, onCancel } = useSearchEffect();
 const { getPlot } = useGetPlotEffect();
 
 
+function drawPolygonDialogClosed(){
+    console.log('src/views/HomePage.vue DrawPolygonDialog @close');
+    currentGroundId.value = '';
+    getPlot();
+    closeWebPopup()
+}
 
 
 // const earnCoinClick = () => {

@@ -10,9 +10,9 @@ import Vant, { Toast } from 'vant';
 
 import 'src/assets/style/reset.less';
 
-import './index.css';
-
 import 'vant/lib/index.less';
+
+import './index.css';
 
 import 'swiper/css';
 import "swiper/css/pagination"

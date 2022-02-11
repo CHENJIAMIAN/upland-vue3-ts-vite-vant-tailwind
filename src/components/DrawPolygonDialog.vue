@@ -4,11 +4,11 @@
     v-model:show="vantshow"
     width="90%"
     show-cancel-button
-    @confirm="root && (root.onSubmit(), root.onCancel())"
-    @cancel="root && root.onCancel()"
+    @confirm="root?.onSubmit(), root?.onCancel()"
+    @cancel="root?.onCancel()"
   >
-    <div class="text-center my-2" slot="title">
-      <van-button type="primary" @click="deletePlot">删除地块</van-button>地块信息
+    <div class="text-center my-2 relative" slot="title">
+      <van-button v-if="props.id" size="small" type="primary" @click="deletePlot" class="!absolute left-3">删除地块</van-button>地块信息
     </div>
     <DrawPolygon
       :id="props.id"
@@ -55,8 +55,7 @@ function deletePlot() {
       // on confirm
       plotDELETE(props.id).then(r => {
         Toast('地块已删除');
-        emit('deleted');
-        emit('close');
+        root?.value.onCancel()
       })
     })
     .catch(() => {
