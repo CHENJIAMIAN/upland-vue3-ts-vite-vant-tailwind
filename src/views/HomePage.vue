@@ -52,7 +52,7 @@
 
         <DrawPolygonDialog
             :id="currentGroundId"
-            ref="drawPolygonDialog"    
+            ref="drawPolygonDialog"
             @close="drawPolygonDialogClosed"
             @submit="getPlot()"
         />
@@ -241,9 +241,11 @@ const useOlOverLayEffect = () => {
                 if (!layer) return;
                 const { id, flag } = layer.getProperties();
                 if (flag === 'plot') {
+                    const coord = map?.getCoordinateFromPixel(evt.pixel);
+                    map?.getView().setCenter(coord);
+
                     if (portrait) router.push(`/PlotDetailPage/${id}`);
                     else {
-                        const coord = map?.getCoordinateFromPixel(evt.pixel);
                         overlay?.setPosition(coord);
                         currentGroundId.value = id;
                     }
@@ -373,13 +375,13 @@ const useGetPlotEffect = () => {
                 const style = new Style({
                     stroke: new Stroke({ width: 1, color: 'lightblue' }),
                     fill: new Fill({ color: colorsMap[ground.saleState] }),
-                    text: new Text({
-                        font: 'normal 16px Arial',
-                        text: ground.address,
-                        fill: new Fill({
-                            color: 'white',
-                        }),
-                    }),
+                    // text: new Text({
+                    //     font: 'normal 16px Arial',
+                    //     text: ground.address,
+                    //     fill: new Fill({
+                    //         color: 'white',
+                    //     }),
+                    // }),
                 });
                 layer.setProperties(ground);
                 layer.getSource().getFeatures().forEach(i => i.setStyle(style))
@@ -387,7 +389,7 @@ const useGetPlotEffect = () => {
                 if (index === 0 && center && center[0] === 12709830.405784814) {
                     console.log(center);
                     map?.getView().fit(vectorSource?.getFeatures()[0]?.getGeometry() as SimpleGeometry);
-                    map?.getView().setZoom(17);
+                    map?.getView().setZoom(18);
                 }
             });
         });
@@ -421,7 +423,7 @@ const { searchValue, onSearch, onCancel } = useSearchEffect();
 const { getPlot } = useGetPlotEffect();
 
 
-function drawPolygonDialogClosed(){
+function drawPolygonDialogClosed() {
     console.log('src/views/HomePage.vue DrawPolygonDialog @close');
     currentGroundId.value = '';
     getPlot();
